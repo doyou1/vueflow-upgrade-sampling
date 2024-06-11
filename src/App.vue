@@ -2,14 +2,29 @@
   <el-container class="wrap conatiner">
     <el-header class="header">Header</el-header>
     <el-container class="container">
-      <el-aside class="aside" width="200px">Aside</el-aside>
-      <el-main class="main">Main</el-main>
+      <el-aside class="aside" width="200px">
+        <side-bar/>
+      </el-aside>
+      <el-main class="main">
+        <main-panel 
+          :nodes="nodes"
+          @node-drag-stop="handleNodeDragStop"
+        />
+        <!-- <edit-detail /> -->
+      </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
 import { ElContainer, ElHeader, ElAside, ElMain } from "element-plus";
+import MainPanel from "@/components/MainPanel.vue";
+import SideBar from "@/components/SideBar.vue";
+import { useVueflowController } from "@/composables/use-vueflow-controller";
+
+
+const { nodes, handleNodeDragStop } = useVueflowController();
+
 </script>
 
 <style scoped lang="scss">
