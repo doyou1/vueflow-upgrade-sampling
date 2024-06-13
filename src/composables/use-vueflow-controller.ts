@@ -10,7 +10,17 @@ export type NodeWrap = SqlNode | SelectNode | GroupByNode | JoinNode | FilterNod
 
 export type NodeProps = {
     position: XYPosition;
+    type: NodeType;
 }
+
+export type NodeType = 
+| "sql"
+| "select"
+| "group_by"
+| "join"
+| "filter"
+| "data_source"
+| "dataset";
 export type SqlNode = NodeOriginal<SqlNodeData, any, "sql">
 export type SelectNode = NodeOriginal<SelectNodeData, any, "select">
 export type GroupByNode = NodeOriginal<GroupByNodeData, any, "group_by">
@@ -65,6 +75,9 @@ enum SIZE {
     WIDTH = 150,
     HEIGHT = 50
 }
+
+export type InnerNode = Omit<Node, "position" | "width" | "height">;
+
 
 const getRandomNumber = (min: number, max: number) => {
     return Math.random() * (max - min) + min;

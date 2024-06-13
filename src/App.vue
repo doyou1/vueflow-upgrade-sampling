@@ -3,7 +3,7 @@
     <el-header class="header">Header</el-header>
     <el-container class="container">
       <el-aside class="aside" width="200px">
-        <side-bar/>
+        <side-bar />
       </el-aside>
       <el-main class="main">
         <main-panel 
@@ -21,7 +21,6 @@ import { ElContainer, ElHeader, ElAside, ElMain } from "element-plus";
 import MainPanel from "@/components/MainPanel.vue";
 import SideBar from "@/components/SideBar.vue";
 import { useVueflowController } from "@/composables/use-vueflow-controller";
-
 
 const { nodes, handleNodeDragStop } = useVueflowController();
 

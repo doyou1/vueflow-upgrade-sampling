@@ -1,5 +1,86 @@
-<template>sidebar</template>
+<template>
+  <div v-for="node in nodes" :key="node.id">
+    <node-item
+      :id="node.id"
+      :type="node.type"
+      :name="node.data?.name ?? ''"
+      view-type="sidebar"
+    />
+  </div>
+</template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import NodeItem from "@/components/nodes/NodeItem.vue";
+import { computed } from "vue";
+import { InnerNode } from "../composables/use-vueflow-controller";
+
+const nodes = computed<Array<InnerNode>>(() => [
+  {
+    id: "1",
+    type: "sql",
+    data: {
+      name: "SQL",
+      value: "",
+    },
+  },
+  {
+    id: "2",
+    type: "select",
+    data: {
+      name: "SELECT",
+      value: "",
+      options: [
+        {
+          value: "1",
+          label: "label1",
+        },
+        {
+          value: "2",
+          label: "label2",
+        },
+        {
+          value: "3",
+          label: "label3",
+        },
+      ],
+    },
+  },
+  {
+    id: "3",
+    type: "group_by",
+    data: {
+      name: "GROUPBY",
+    },
+  },
+  {
+    id: "4",
+    type: "join",
+    data: {
+      name: "JOIN",
+    },
+  },
+  {
+    id: "5",
+    type: "filter",
+    data: {
+      name: "FILTER",
+    },
+  },
+  {
+    id: "6",
+    type: "data_source",
+    data: {
+      name: "DATASOURCE",
+    },
+  },
+  {
+    id: "7",
+    type: "dataset",
+    data: {
+      name: "DATASET",
+    },
+  },
+]);
+</script>
 
 <style scoped lang="scss"></style>
