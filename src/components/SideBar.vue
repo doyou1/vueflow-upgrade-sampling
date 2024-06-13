@@ -1,11 +1,13 @@
 <template>
-  <div v-for="node in nodes" :key="node.id">
-    <node-item
-      :id="node.id"
-      :type="node.type"
-      :name="node.data?.name ?? ''"
-      view-type="sidebar"
-    />
+  <div class="sidebar-container">
+    <div v-for="node in nodes" :key="node.id">
+      <node-item
+        :id="node.id"
+        :type="node.type"
+        :name="node.data?.name ?? ''"
+        view-type="sidebar"
+      />
+    </div>
   </div>
 </template>
 
@@ -83,4 +85,11 @@ const nodes = computed<Array<InnerNode>>(() => [
 ]);
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+</style>

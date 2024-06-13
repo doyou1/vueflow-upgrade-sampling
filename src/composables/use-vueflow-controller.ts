@@ -71,7 +71,7 @@ export type XYPosition = {
     y: number
 }
 
-enum SIZE {
+export enum SIZE {
     WIDTH = 150,
     HEIGHT = 50
 }

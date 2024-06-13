@@ -1,5 +1,5 @@
 <template>
-  <div :class="['wrap', viewType]">
+  <div :class="['wrap', viewType]" :style="innerStyle">
     <Handle v-if="!deleteHandle" type="source" :position="Position.Top" />
     <div class="content">
       <div class="icon">
@@ -29,6 +29,7 @@ import IconFilter from "@/components/icons/IconFilter.vue";
 import IconDataSource from "@/components/icons/IconDataSource.vue";
 import IconDataset from "@/components/icons/IconDataset.vue";
 import { computed } from "vue";
+import { SIZE } from "@/composables/use-vueflow-controller";
 const props = withDefaults(
   defineProps<{
     id: string;
@@ -43,12 +44,16 @@ const props = withDefaults(
 );
 
 const deleteHandle = computed(() => props.viewType === "sidebar")
+const innerStyle = computed(() => ({
+  "--wrap-width": `${SIZE.WIDTH}px`,
+  "--wrap-height": `${SIZE.HEIGHT}px`,
+}))
 </script>
 
 <style scoped lang="scss">
 .wrap {
-  width: 100%;
-  height: 100%;
+  width: var(--wrap-width);
+  height: var(--wrap-height);
   background-color: white;
 
   &.sidebar {
