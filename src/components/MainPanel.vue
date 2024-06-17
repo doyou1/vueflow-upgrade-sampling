@@ -4,6 +4,8 @@
     @node-drag-stop="
       $emit('nodeDragStop', $event.node.id, $event.node.position)
     "
+    @dragover="$emit('dragOver', $event)"
+    @dragleave="$emit('dragLeave', $event)"
   >
     <template #node-sql="{id, type, data}">
       <node-item :id="id" :type="type" :name="data.name" />
@@ -39,6 +41,8 @@ defineProps<{
 
 const emits = defineEmits<{
   (e: "nodeDragStop", nodeId: string, newPosition: XYPosition): void;
+  (e: "dragOver", event: DragEvent): void;
+  (e: "dragLeave", event: DragEvent): void;
 }>();
 
 </script>

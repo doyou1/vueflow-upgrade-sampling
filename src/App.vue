@@ -3,14 +3,10 @@
     <el-header class="header">Header</el-header>
     <el-container class="container">
       <el-aside class="aside" width="200px">
-        <side-bar />
+        <side-bar @drag-start="onDragStart" />
       </el-aside>
-      <el-main class="main">
-        <main-panel 
-          :nodes="nodes"
-          @node-drag-stop="handleNodeDragStop"
-        />
-        <!-- <edit-detail /> -->
+      <el-main class="main" @drop="onDrop">
+        <main-panel :nodes="nodes" @node-drag-stop="handleNodeDragStop" @drag-over="onDragOver" @drag-leave="onDragLeave" />
       </el-main>
     </el-container>
   </el-container>
@@ -20,10 +16,22 @@
 import { ElContainer, ElHeader, ElAside, ElMain } from "element-plus";
 import MainPanel from "@/components/MainPanel.vue";
 import SideBar from "@/components/SideBar.vue";
-import { useVueflowController } from "@/composables/use-vueflow-controller";
+import {
+  Node,
+  useDragAndDrop,
+  useVueflowController,
+} from "@/composables/use-vueflow-controller";
 
-const { nodes, handleNodeDragStop } = useVueflowController();
-
+const { nodes, handleNodeDragStop, onAddNode, onUpdateNode } = useVueflowController();
+const {
+  onDragStart,
+  onDragLeave,
+  onDragOver,
+  onDrop,
+} = useDragAndDrop({
+  addNode: onAddNode,
+  updateNode: onUpdateNode,
+});
 </script>
 
 <style scoped lang="scss">

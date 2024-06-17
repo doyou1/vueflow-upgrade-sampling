@@ -6,6 +6,8 @@
         :type="node.type"
         :name="node.data?.name ?? ''"
         view-type="sidebar"
+        :draggable="true"
+        @dragstart="$emit('dragStart', $event, node.type)"
       />
     </div>
   </div>
@@ -14,7 +16,11 @@
 <script setup lang="ts">
 import NodeItem from "@/components/nodes/NodeItem.vue";
 import { computed } from "vue";
-import { InnerNode } from "../composables/use-vueflow-controller";
+import { InnerNode, NodeType } from "@/composables/use-vueflow-controller";
+
+defineEmits<{
+  (e: "dragStart", event: DragEvent, type: NodeType): void;
+}>()
 
 const nodes = computed<Array<InnerNode>>(() => [
   {

@@ -1,5 +1,7 @@
-import { Node as NodeOriginal, Edge as EdgeOriginal } from "@vue-flow/core"
-import { ref } from "vue";
+import { Node as NodeOriginal, Edge as EdgeOriginal, useVueFlow } from "@vue-flow/core"
+import { ref, watch } from "vue";
+import { useId } from "@/composables/use-id";
+import invariant from "tiny-invariant";
 
 export type Elements = (Node | Edge)[];
 
@@ -13,14 +15,14 @@ export type NodeProps = {
     type: NodeType;
 }
 
-export type NodeType = 
-| "sql"
-| "select"
-| "group_by"
-| "join"
-| "filter"
-| "data_source"
-| "dataset";
+export type NodeType =
+    | "sql"
+    | "select"
+    | "group_by"
+    | "join"
+    | "filter"
+    | "data_source"
+    | "dataset";
 export type SqlNode = NodeOriginal<SqlNodeData, any, "sql">
 export type SelectNode = NodeOriginal<SelectNodeData, any, "select">
 export type GroupByNode = NodeOriginal<GroupByNodeData, any, "group_by">
@@ -179,6 +181,15 @@ export const useVueflowController = () => {
 
     const nodes = ref<Array<Node>>(getInitNodes());
 
+
+
+    const findNode = (nodeId: string) => {
+        return {
+            node: nodes.value.find((v) => v.id === nodeId),
+            index: nodes.value.findIndex((v) => v.id === nodeId),
+        }
+    };
+
     /** update position value */
     const handleNodeDragStop = (nodeId: string, newPosition: XYPosition) => {
         const tIdx = nodes.value.findIndex((node) => node.id === nodeId);
@@ -187,9 +198,138 @@ export const useVueflowController = () => {
         }
     }
 
+    const onAddNode = (newNode: Node) => {
+        switch (newNode.type) {
+
+            case "group_by":
+            case "join":
+            case "filter":
+            case "data_source":
+            case "dataset": {
+                nodes.value.push({
+                    ...newNode,
+                    data: {
+                        name: newNode.type.toUpperCase(),
+                    }
+                });
+                break;
+            }
+            case "sql": {
+                nodes.value.push({
+                    ...newNode,
+                    data: {
+                        name: newNode.type.toUpperCase(),
+                        value: "",
+                    }
+                });
+                break;
+            }
+
+            case "select": {
+                nodes.value.push({
+                    ...newNode,
+                    data: {
+                        name: newNode.type.toUpperCase(),
+                        value: "",
+                        options: [],
+                    }
+                });
+                break;
+            }
+        }
+    }
+
+    const onUpdateNode = (nodeId: string, nodeUpdate: (node: Node) => Node) => {
+        const { node, index } = findNode(nodeId);
+        invariant((node && index !== -1));
+        nodes.value[index] = nodeUpdate(node);
+    }
+
     return {
         nodes,
-        handleNodeDragStop
+        handleNodeDragStop,
+        onAddNode,
+        onUpdateNode
     };
+
+}
+
+export const useDragAndDrop = (
+    options?: {
+        addNode: (newNode: Node) => void;
+        updateNode: (nodeId: string, nodeUpdate: (node: Node) => Node) => void;
+    }) => {
+
+    const draggedType = ref<NodeType | undefined>(undefined);
+    const isDragOver = ref(false);
+    const isDragging = ref(false);
+
+
+    watch(isDragging, (dragging) => {
+        document.body.style.userSelect = dragging ? 'none' : ''
+    });
+
+    const { generate } = useId();
+
+    const onDragStart = (event: DragEvent, type: NodeType) => {
+        if (event.dataTransfer) {
+            event.dataTransfer.setData('application/vueflow', type)
+            event.dataTransfer.effectAllowed = 'move'
+        }
+        draggedType.value = type;
+        isDragging.value = true
+        document.addEventListener('drop', onDragEnd)
+    }
+
+    const onDragOver = (event: DragEvent) => {
+        event.preventDefault()
+
+        if (draggedType.value) {
+            isDragOver.value = true
+
+            if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = 'move'
+            }
+        }
+    }
+
+    const onDragLeave = () => {
+        isDragOver.value = false;
+    }
+
+    const onDragEnd = () => {
+        isDragging.value = false
+        isDragOver.value = false
+        draggedType.value = undefined;
+        document.removeEventListener('drop', onDragEnd)
+    }
+
+    const { screenToFlowCoordinate } = useVueFlow();
+
+    const onDrop = (event: DragEvent) => {
+        invariant(draggedType.value !== undefined);
+
+        const position = screenToFlowCoordinate({
+            x: event.clientX,
+            y: event.clientY,
+        })
+        const newNode: Node = {
+            id: generate(),
+            type: draggedType.value,
+            position,
+        }
+        options?.addNode(newNode);
+    }
+
+    return {
+        draggedType,
+        isDragOver,
+        isDragging,
+        onDragStart,
+        onDragLeave,
+        onDragOver,
+        onDrop,
+    }
+
 
 }
