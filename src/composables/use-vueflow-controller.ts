@@ -78,6 +78,11 @@ export enum SIZE {
     HEIGHT = 50
 }
 
+export type Dimensions = {
+    width: number;
+    height: number;
+};
+
 export type InnerNode = Omit<Node, "position" | "width" | "height">;
 
 
@@ -85,8 +90,7 @@ const getRandomNumber = (min: number, max: number) => {
     return Math.random() * (max - min) + min;
 }
 
-
-const getInitNodes = (): Array<Node> => {
+const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
     return [
         {
             id: '1',
@@ -95,7 +99,7 @@ const getInitNodes = (): Array<Node> => {
                 name: "SQL",
                 value: "",
             },
-            position: { x: getRandomNumber(0, 300), y: getRandomNumber(0, 300) },
+            position: { x: panelDimensions.width / 2 - SIZE.WIDTH, y: panelDimensions.height / 2 - SIZE.HEIGHT },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -120,7 +124,7 @@ const getInitNodes = (): Array<Node> => {
                     },
                 ],
             },
-            position: { x: getRandomNumber(0, 300), y: getRandomNumber(0, 300) },
+            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -130,7 +134,7 @@ const getInitNodes = (): Array<Node> => {
             data: {
                 name: "GROUPBY",
             },
-            position: { x: getRandomNumber(0, 300), y: getRandomNumber(0, 300) },
+            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -140,7 +144,7 @@ const getInitNodes = (): Array<Node> => {
             data: {
                 name: "JOIN",
             },
-            position: { x: getRandomNumber(0, 300), y: getRandomNumber(0, 300) },
+            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -150,7 +154,7 @@ const getInitNodes = (): Array<Node> => {
             data: {
                 name: "FILTER",
             },
-            position: { x: getRandomNumber(0, 300), y: getRandomNumber(0, 300) },
+            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -160,7 +164,7 @@ const getInitNodes = (): Array<Node> => {
             data: {
                 name: "DATASOURCE",
             },
-            position: { x: getRandomNumber(0, 300), y: getRandomNumber(0, 300) },
+            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -170,7 +174,7 @@ const getInitNodes = (): Array<Node> => {
             data: {
                 name: "DATASET",
             },
-            position: { x: getRandomNumber(0, 300), y: 114 },
+            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -179,9 +183,15 @@ const getInitNodes = (): Array<Node> => {
 
 export const useVueflowController = () => {
 
-    const nodes = ref<Array<Node>>(getInitNodes());
+    const panelDimensions = ref<Dimensions>({
+        width: 0,
+        height: 0,
+    });
+    const nodes = ref<Array<Node>>([]);
 
-
+    const onInitialized = () => {
+        nodes.value = getInitNodes(panelDimensions.value)
+    }
 
     const findNode = (nodeId: string) => {
         return {
@@ -246,8 +256,10 @@ export const useVueflowController = () => {
     }
 
     return {
+        panelDimensions,
         nodes,
         handleNodeDragStop,
+        onInitialized,
         onAddNode,
         onUpdateNode
     };

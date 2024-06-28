@@ -6,7 +6,7 @@
         <side-bar @drag-start="onDragStart" />
       </el-aside>
       <el-main class="main" @drop="onDrop">
-        <main-panel :nodes="nodes" @node-drag-stop="handleNodeDragStop" @drag-over="onDragOver" @drag-leave="onDragLeave" />
+        <main-panel :nodes="nodes" v-model:panel-dimensions="panelDimensions" @node-drag-stop="handleNodeDragStop" @drag-over="onDragOver" @drag-leave="onDragLeave" @initialized="onInitialized" />
       </el-main>
     </el-container>
   </el-container>
@@ -22,7 +22,7 @@ import {
   useVueflowController,
 } from "@/composables/use-vueflow-controller";
 
-const { nodes, handleNodeDragStop, onAddNode, onUpdateNode } = useVueflowController();
+const { nodes, panelDimensions, handleNodeDragStop, onAddNode, onUpdateNode, onInitialized } = useVueflowController();
 const {
   onDragStart,
   onDragLeave,
