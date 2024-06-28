@@ -24,10 +24,10 @@
       <node-item :id="id" :type="type" :name="data.name" />
     </template>
     <template #node-data_source="{ id, type, data }">
-      <node-item :id="id" :type="type" :name="data.name" />
+      <node-item :id="id" :type="type" :name="data.name" hide-top-handle />
     </template>
     <template #node-dataset="{ id, type, data }">
-      <node-item :id="id" :type="type" :name="data.name" />
+      <node-item :id="id" :type="type" :name="data.name" hide-bottom-handle />
     </template>
   </vue-flow>
 </template>

@@ -1,6 +1,6 @@
 <template>
   <div :class="['wrap', viewType]" :style="innerStyle">
-    <Handle v-if="!deleteHandle" type="source" :position="Position.Top" />
+    <Handle v-if="visibleTopHandle" type="source" :position="Position.Top" />
     <div class="content">
       <div class="icon">
         <icon-sql v-if="type === 'sql'" />
@@ -15,7 +15,7 @@
         {{ name }}
       </div>
     </div>
-    <Handle v-if="!deleteHandle"  type="target" :position="Position.Bottom" />
+    <Handle v-if="visibleBottomHandle"  type="target" :position="Position.Bottom" />
   </div>
 </template>
 
@@ -37,13 +37,18 @@ const props = withDefaults(
     type: string;
     name: string;
     viewType?: "sidebar" | "main-panel";
+    hideTopHandle?: boolean;
+    hideBottomHandle?: boolean;
   }>(),
   {
     viewType: "main-panel",
+    hideTopHandle: false,
+    hideBottomHandle: false,
   }
 );
 
-const deleteHandle = computed(() => props.viewType === "sidebar")
+const visibleTopHandle = computed(() => props.viewType !== "sidebar" && !props.hideTopHandle)
+const visibleBottomHandle = computed(() => props.viewType !== "sidebar" && !props.hideBottomHandle)
 const innerStyle = computed(() => ({
   "--wrap-width": `${SIZE.WIDTH}px`,
   "--wrap-height": `${SIZE.HEIGHT}px`,
