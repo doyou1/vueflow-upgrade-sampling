@@ -85,96 +85,16 @@ export type Dimensions = {
 
 export type InnerNode = Omit<Node, "position" | "width" | "height">;
 
-
-const getRandomNumber = (min: number, max: number) => {
-    return Math.random() * (max - min) + min;
-}
-
 const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
+    const { generate } = useId();
     return [
         {
-            id: '1',
-            type: 'sql',
-            data: {
-                name: "SQL",
-                value: "",
-            },
-            position: { x: panelDimensions.width / 2 - SIZE.WIDTH, y: panelDimensions.height / 2 - SIZE.HEIGHT },
-            width: SIZE.WIDTH,
-            height: SIZE.HEIGHT,
-        },
-        {
-            id: '2',
-            type: 'select',
-            data: {
-                name: "SELECT",
-                value: "",
-                options: [
-                    {
-                        value: "1",
-                        label: "label1",
-                    },
-                    {
-                        value: "2",
-                        label: "label2",
-                    },
-                    {
-                        value: "3",
-                        label: "label3",
-                    },
-                ],
-            },
-            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
-            width: SIZE.WIDTH,
-            height: SIZE.HEIGHT,
-        },
-        {
-            id: '3',
-            type: 'group_by',
-            data: {
-                name: "GROUPBY",
-            },
-            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
-            width: SIZE.WIDTH,
-            height: SIZE.HEIGHT,
-        },
-        {
-            id: '4',
-            type: 'join',
-            data: {
-                name: "JOIN",
-            },
-            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
-            width: SIZE.WIDTH,
-            height: SIZE.HEIGHT,
-        },
-        {
-            id: '5',
-            type: 'filter',
-            data: {
-                name: "FILTER",
-            },
-            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
-            width: SIZE.WIDTH,
-            height: SIZE.HEIGHT,
-        },
-        {
-            id: '6',
-            type: 'data_source',
-            data: {
-                name: "DATASOURCE",
-            },
-            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
-            width: SIZE.WIDTH,
-            height: SIZE.HEIGHT,
-        },
-        {
-            id: '7',
+            id: generate(),
             type: 'dataset',
             data: {
                 name: "DATASET",
             },
-            position: { x: getRandomNumber(0, panelDimensions.width - SIZE.WIDTH), y: getRandomNumber(0, panelDimensions.height - SIZE.HEIGHT) },
+            position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: Math.floor(panelDimensions.height * (2/3) - SIZE.HEIGHT / 2) },
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
