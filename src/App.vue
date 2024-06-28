@@ -6,7 +6,16 @@
         <side-bar @drag-start="onDragStart" />
       </el-aside>
       <el-main class="main" @drop="onDrop">
-        <main-panel :nodes="nodes" v-model:panel-dimensions="panelDimensions" @node-drag-stop="handleNodeDragStop" @drag-over="onDragOver" @drag-leave="onDragLeave" @initialized="onInitialized" />
+        <main-panel
+          :nodes="nodes"
+          :edges="edges"
+          v-model:panel-dimensions="panelDimensions"
+          @node-drag-stop="handleNodeDragStop"
+          @drag-over="onDragOver"
+          @drag-leave="onDragLeave"
+          @initialized="onInitialized"
+          @add-edge="onAddEdge"
+        />
       </el-main>
     </el-container>
   </el-container>
@@ -22,13 +31,17 @@ import {
   useVueflowController,
 } from "@/composables/use-vueflow-controller";
 
-const { nodes, panelDimensions, handleNodeDragStop, onAddNode, onUpdateNode, onInitialized } = useVueflowController();
 const {
-  onDragStart,
-  onDragLeave,
-  onDragOver,
-  onDrop,
-} = useDragAndDrop({
+  panelDimensions,
+  nodes,
+  edges,
+  handleNodeDragStop,
+  onAddNode,
+  onUpdateNode,
+  onInitialized,
+  onAddEdge
+} = useVueflowController();
+const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
   addNode: onAddNode,
   updateNode: onUpdateNode,
 });

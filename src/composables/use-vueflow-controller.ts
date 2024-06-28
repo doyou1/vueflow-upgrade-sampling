@@ -85,6 +85,11 @@ export type Dimensions = {
     height: number;
 };
 
+export type Connection = {
+    source: string;
+    target: string;
+}
+
 export type InnerNode = Omit<Node, "position" | "width" | "height">;
 
 const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
@@ -96,7 +101,7 @@ const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
             data: {
                 name: "DATASET",
             },
-            position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: Math.floor(panelDimensions.height * (2/3) - SIZE.HEIGHT / 2) },
+            position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: Math.floor(panelDimensions.height * (2 / 3) - SIZE.HEIGHT / 2) },
             deletable: false,
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
@@ -111,6 +116,7 @@ export const useVueflowController = () => {
         height: 0,
     });
     const nodes = ref<Array<Node>>([]);
+    const edges = ref<Array<Edge>>([]);
 
     const onInitialized = () => {
         nodes.value = getInitNodes(panelDimensions.value)
@@ -133,7 +139,6 @@ export const useVueflowController = () => {
 
     const onAddNode = (newNode: Node) => {
         switch (newNode.type) {
-
             case "group_by":
             case "join":
             case "filter":
@@ -178,13 +183,25 @@ export const useVueflowController = () => {
         nodes.value[index] = nodeUpdate(node);
     }
 
+    const onAddEdge = (value: Connection) => {
+        const { generate } = useId();
+
+        edges.value.push({
+            id: generate(),
+            source: value.source,
+            target: value.target,
+        });
+    }
+
     return {
         panelDimensions,
         nodes,
+        edges,
         handleNodeDragStop,
         onInitialized,
         onAddNode,
-        onUpdateNode
+        onUpdateNode,
+        onAddEdge
     };
 
 }
