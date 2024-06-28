@@ -199,7 +199,7 @@ export const useVueflowController = () => {
     }
 
     const onRemoveEdges = (removeEdgeIds: Array<string>) => {
-        nodes.value = nodes.value.filter((node) => !removeEdgeIds.includes(node.id));
+        edges.value = edges.value.filter((edge) => !removeEdgeIds.includes(edge.id));
     }
 
     return {
