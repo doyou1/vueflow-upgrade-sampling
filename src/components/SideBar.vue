@@ -81,13 +81,6 @@ const nodes = computed<Array<InnerNode>>(() => [
       name: "DATASOURCE",
     },
   },
-  {
-    id: "7",
-    type: "dataset",
-    data: {
-      name: "DATASET",
-    },
-  },
 ]);
 </script>
 

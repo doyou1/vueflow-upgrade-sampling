@@ -13,6 +13,7 @@ export type NodeWrap = SqlNode | SelectNode | GroupByNode | JoinNode | FilterNod
 export type NodeProps = {
     position: XYPosition;
     type: NodeType;
+    deletable?: boolean;
 }
 
 export type NodeType =
@@ -30,6 +31,7 @@ export type JoinNode = NodeOriginal<JoinNodeData, any, "join">
 export type FilterNode = NodeOriginal<FilterNodeData, any, "filter">
 export type DataSourceNode = NodeOriginal<DataSourceNodeData, any, "data_source">
 export type DatasetNode = NodeOriginal<DatasetNodeData, any, "dataset">
+
 export type SqlNodeData = {
     name: string;
     value: string;
@@ -95,6 +97,7 @@ const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
                 name: "DATASET",
             },
             position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: Math.floor(panelDimensions.height * (2/3) - SIZE.HEIGHT / 2) },
+            deletable: false,
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
