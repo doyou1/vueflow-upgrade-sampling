@@ -3,6 +3,8 @@ import { ref, watch } from "vue";
 import { useId } from "@/composables/use-id";
 import invariant from "tiny-invariant";
 
+export type { NodeChange, EdgeChange } from "@vue-flow/core";
+
 export type Elements = (Node | Edge)[];
 
 export type Node = NodeWrap & NodeProps;
@@ -192,6 +194,13 @@ export const useVueflowController = () => {
             target: value.target,
         });
     }
+    const onRemoveNodes = (removeNodeIds: Array<string>) => {
+        nodes.value = nodes.value.filter((node) => !removeNodeIds.includes(node.id));
+    }
+
+    const onRemoveEdges = (removeEdgeIds: Array<string>) => {
+        nodes.value = nodes.value.filter((node) => !removeEdgeIds.includes(node.id));
+    }
 
     return {
         panelDimensions,
@@ -201,7 +210,9 @@ export const useVueflowController = () => {
         onInitialized,
         onAddNode,
         onUpdateNode,
-        onAddEdge
+        onAddEdge,
+        onRemoveNodes,
+        onRemoveEdges,
     };
 
 }

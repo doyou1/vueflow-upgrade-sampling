@@ -9,6 +9,8 @@
     @dragover="$emit('dragOver', $event)"
     @dragleave="$emit('dragLeave', $event)"
     @connect="$emit('addEdge', $event)"
+    @nodes-change="onNodesChange"
+    @edges-change="onEdgesChange"
   >
     <template #node-sql="{ id, type, data }">
       <node-item :id="id" :type="type" :name="data.name" />
@@ -36,7 +38,7 @@
 
 <script setup lang="ts">
 import { VueFlow } from "@vue-flow/core";
-import { Node, Edge, XYPosition, Dimensions, Connection } from "@/composables/use-vueflow-controller";
+import { Node, Edge, XYPosition, Dimensions, Connection, NodeChange, EdgeChange } from "@/composables/use-vueflow-controller";
 import NodeItem from "@/components/nodes/NodeItem.vue";
 import { ref, computed, watch } from "vue";
 defineProps<{
@@ -52,6 +54,8 @@ const emits = defineEmits<{
   (e: "update:panelDimensions", value: number): void;
   (e: "initialized"): void;
   (e: "addEdge", value: Connection): void;
+  (e: "remove:nodes", removeNodeIds: Array<string>): void;
+  (e: "remove:edges", removeEdgeIds: Array<string>): void;
 }>();
 
 const vueFlowRef = ref<InstanceType<typeof VueFlow>>();
@@ -62,6 +66,19 @@ watch(vueFlowRef, () => {
     emits("initialized");
   }
 });
+
+const onNodesChange = (values: Array<NodeChange>) => {
+  const removeNodeIds = values.filter((value) => value.type === "remove").map((value) => value.id);
+  if (removeNodeIds.length > 0) {
+    emits("remove:nodes", removeNodeIds);    
+  }
+}
+const onEdgesChange = (values: Array<EdgeChange>) => {
+  const removeEdgeIds = values.filter((value) => value.type === "remove").map((value) => value.id);
+  if (removeEdgeIds.length > 0) {
+    emits("remove:edges", removeEdgeIds)
+  }
+}
 
 </script>
 

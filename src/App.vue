@@ -15,6 +15,8 @@
           @drag-leave="onDragLeave"
           @initialized="onInitialized"
           @add-edge="onAddEdge"
+          @remove:nodes="onRemoveNodes"
+          @remove:edges="onRemoveEdges"
         />
       </el-main>
     </el-container>
@@ -39,7 +41,9 @@ const {
   onAddNode,
   onUpdateNode,
   onInitialized,
-  onAddEdge
+  onAddEdge,
+  onRemoveNodes,
+  onRemoveEdges,
 } = useVueflowController();
 const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
   addNode: onAddNode,
