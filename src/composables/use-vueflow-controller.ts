@@ -34,6 +34,14 @@ export type FilterNode = NodeOriginal<FilterNodeData, any, "filter">
 export type DataSourceNode = NodeOriginal<DataSourceNodeData, any, "data_source">
 export type DatasetNode = NodeOriginal<DatasetNodeData, any, "dataset">
 
+export type NodeData =
+    | SqlNodeData
+    | SelectNodeData
+    | GroupByNodeData
+    | JoinNodeData
+    | FilterNodeData
+    | DataSourceNodeData
+    | DatasetNodeData;
 export type SqlNodeData = {
     name: string;
     value: string;
@@ -92,6 +100,8 @@ export type Connection = {
     target: string;
 }
 
+export type MenuType = "detail" | "delete";
+
 export type InnerNode = Omit<Node, "position" | "width" | "height">;
 
 const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
@@ -112,6 +122,8 @@ const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
 }
 
 export const useVueflowController = () => {
+
+    const original = useVueFlow();
 
     const panelDimensions = ref<Dimensions>({
         width: 0,
@@ -202,6 +214,40 @@ export const useVueflowController = () => {
         edges.value = edges.value.filter((edge) => !removeEdgeIds.includes(edge.id));
     }
 
+    const onClickMenu = (menu: MenuType, nodeId: string) => {
+        switch (menu) {
+            case "detail": {
+                openDetailEditor(nodeId);
+                break;
+            }
+            case "delete": {
+                onRemoveNodes([nodeId]);
+                break;
+            }
+        }
+    }
+
+    const targetNode = ref<Node | undefined>(undefined);
+
+    const openDetailEditor = (nodeId: string) => {
+        const { node } = findNode(nodeId);
+        if (node) {
+            targetNode.value = node;
+        }
+    }
+
+    const closeDetailEditor = () => {
+        targetNode.value = undefined;
+    }
+
+    const saveNode = (newNode: Node) => {
+        invariant(targetNode.value && targetNode.value.id === newNode.id && targetNode.value.type === newNode.type);
+        const { index } = findNode(newNode.id);
+        invariant(index !== -1);
+        nodes.value[index] = newNode;
+        original.updateNode(newNode.id, { data: { ...newNode.data } });
+    }
+
     return {
         panelDimensions,
         nodes,
@@ -213,6 +259,10 @@ export const useVueflowController = () => {
         onAddEdge,
         onRemoveNodes,
         onRemoveEdges,
+        onClickMenu,
+        targetNode,
+        closeDetailEditor,
+        saveNode,
     };
 
 }
@@ -267,12 +317,12 @@ export const useDragAndDrop = (
         document.removeEventListener('drop', onDragEnd)
     }
 
-    const { screenToFlowCoordinate } = useVueFlow();
+    const original = useVueFlow();
 
     const onDrop = (event: DragEvent) => {
         invariant(draggedType.value !== undefined);
 
-        const position = screenToFlowCoordinate({
+        const position = original.screenToFlowCoordinate({
             x: event.clientX,
             y: event.clientY,
         })
@@ -283,7 +333,6 @@ export const useDragAndDrop = (
         }
         options?.addNode(newNode);
     }
-
     return {
         draggedType,
         isDragOver,
@@ -293,6 +342,4 @@ export const useDragAndDrop = (
         onDragOver,
         onDrop,
     }
-
-
 }

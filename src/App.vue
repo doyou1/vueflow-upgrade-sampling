@@ -1,7 +1,7 @@
 <template>
   <el-container class="wrap conatiner">
     <el-header class="header">Header</el-header>
-    <el-container class="container">
+    <el-container v-show="targetNode === undefined" class="container">
       <el-aside class="aside" width="200px">
         <side-bar @drag-start="onDragStart" />
       </el-aside>
@@ -17,18 +17,22 @@
           @add-edge="onAddEdge"
           @remove:nodes="onRemoveNodes"
           @remove:edges="onRemoveEdges"
+          @click:menu="onClickMenu"
         />
       </el-main>
+    </el-container>
+    <el-container v-show="targetNode" class="container">
+      <detail-editor-container v-if="targetNode" :target-node="targetNode" @close="closeDetailEditor" @save="saveNode($event); closeDetailEditor();"/>
     </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
 import { ElContainer, ElHeader, ElAside, ElMain } from "element-plus";
+import DetailEditorContainer from "@/components/DetailEditorContainer.vue";
 import MainPanel from "@/components/MainPanel.vue";
 import SideBar from "@/components/SideBar.vue";
 import {
-  Node,
   useDragAndDrop,
   useVueflowController,
 } from "@/composables/use-vueflow-controller";
@@ -44,7 +48,12 @@ const {
   onAddEdge,
   onRemoveNodes,
   onRemoveEdges,
+  onClickMenu,
+  targetNode,
+  closeDetailEditor,
+  saveNode,
 } = useVueflowController();
+
 const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
   addNode: onAddNode,
   updateNode: onUpdateNode,
@@ -67,6 +76,8 @@ const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
 }
 .main {
   background-color: green;
+
+  position: relative;
 }
 </style>
 
