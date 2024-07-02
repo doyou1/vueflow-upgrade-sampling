@@ -2,6 +2,7 @@ import { Node as NodeOriginal, Edge as EdgeOriginal, useVueFlow } from "@vue-flo
 import { ref, watch } from "vue";
 import { useId } from "@/composables/use-id";
 import invariant from "tiny-invariant";
+import { sleep } from "@/utils/util";
 
 export type { NodeChange, EdgeChange } from "@vue-flow/core";
 
@@ -73,8 +74,22 @@ export type DataSourceNodeData = {
     name: string;
 }
 
+export type UpdateMode = "replace" | "update";
+
+export type DatasetField = {
+    datasetId: string;
+    sourceFieldId: string;
+};
+
+export type DatasetNodeFormData = {
+    updateMode: UpdateMode;
+    fields: Array<DatasetField>;
+};
+
 export type DatasetNodeData = {
     name: string;
+    formData: DatasetNodeFormData;
+    detail: DatasetDetail;
 }
 
 export type EdgeProps = {
@@ -104,14 +119,54 @@ export type MenuType = "detail" | "delete";
 
 export type InnerNode = Omit<Node, "position" | "width" | "height">;
 
-const getInitNodes = (panelDimensions: Dimensions): Array<Node> => {
-    const { generate } = useId();
+export type DatasetDetailField = {
+    id: string;
+    name: string;
+}
+export type DatasetDetail = {
+    id: string,
+    name: string,
+    fields: Array<DatasetDetailField>
+}
+
+const getDatasetDetail = async (datasetId: string): Promise<DatasetDetail> => {
+    await sleep(1000);
+    return {
+        id: datasetId,
+        name: "temp dataset1",
+        fields: [
+            {
+                id: "field1",
+                name: "Field1",
+            },
+            {
+                id: "field2",
+                name: "Field2",
+            },
+        ],
+    }
+
+}
+
+const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> => {
+    // const { generate } = useId();
+    const datasetId = "dataset-1";
+    const result = await getDatasetDetail(datasetId);
     return [
         {
-            id: generate(),
+            // id: generate(),
+            id: datasetId,
             type: 'dataset',
             data: {
-                name: "DATASET",
+                name: result.name,
+                formData: {
+                    updateMode: "replace",
+                    fields: result.fields.map((field) => ({
+                        datasetId: field.id,
+                        sourceFieldId: ""
+                    })),
+                },
+                detail: result,
             },
             position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: Math.floor(panelDimensions.height * (2 / 3) - SIZE.HEIGHT / 2) },
             deletable: false,
@@ -132,8 +187,8 @@ export const useVueflowController = () => {
     const nodes = ref<Array<Node>>([]);
     const edges = ref<Array<Edge>>([]);
 
-    const onInitialized = () => {
-        nodes.value = getInitNodes(panelDimensions.value)
+    const onInitialized = async () => {
+        nodes.value = await getInitNodes(panelDimensions.value)
     }
 
     const findNode = (nodeId: string) => {
@@ -156,8 +211,7 @@ export const useVueflowController = () => {
             case "group_by":
             case "join":
             case "filter":
-            case "data_source":
-            case "dataset": {
+            case "data_source": {
                 nodes.value.push({
                     ...newNode,
                     data: {
@@ -166,6 +220,16 @@ export const useVueflowController = () => {
                 });
                 break;
             }
+            // case "dataset": {
+            //     nodes.value.push({
+            //         ...newNode,
+            //         data: {
+            //             name: newNode.type.toUpperCase(),
+            //             updateMode: "replace",
+            //         }
+            //     });
+            //     break;
+            // }
             case "sql": {
                 nodes.value.push({
                     ...newNode,
