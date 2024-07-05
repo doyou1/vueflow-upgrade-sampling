@@ -217,8 +217,10 @@ export const useVueflowController = () => {
     const nodes = ref<Array<Node>>([]);
     const edges = ref<Array<Edge>>([]);
 
+    const isRealInit = ref<boolean>(false);
     const onInitialized = async () => {
         nodes.value = await getInitNodes(panelDimensions.value)
+        isRealInit.value = true;
     }
 
     const findNode = (nodeId: string) => {
@@ -329,6 +331,7 @@ export const useVueflowController = () => {
         targetNode,
         closeDetailEditor,
         saveNode,
+        isRealInit,
     };
 
 }

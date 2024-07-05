@@ -1,7 +1,7 @@
 <template>
   <el-container class="wrap conatiner">
     <el-header class="header">Header</el-header>
-    <el-container v-show="targetNode === undefined" class="container">
+    <el-container v-loading="!isRealInit" v-show="targetNode === undefined" class="container">
       <el-aside class="aside" width="200px">
         <side-bar @drag-start="onDragStart" />
       </el-aside>
@@ -52,6 +52,7 @@ const {
   targetNode,
   closeDetailEditor,
   saveNode,
+  isRealInit,
 } = useVueflowController();
 
 const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
