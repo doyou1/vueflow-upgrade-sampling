@@ -16,7 +16,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"
       />
@@ -25,7 +25,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"
       />
@@ -34,7 +34,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"
       />
@@ -43,7 +43,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"
       />
@@ -52,7 +52,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"
       />
@@ -61,7 +61,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         hide-top-handle
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"
@@ -71,7 +71,7 @@
       <node-item
         :id="id"
         :type="type"
-        :name="data.name"
+        :name="data.formData.name"
         hide-bottom-handle
         @dblclick="$emit('click:menu', 'detail', id)"
         @click:menu="$emit('click:menu', $event, id)"

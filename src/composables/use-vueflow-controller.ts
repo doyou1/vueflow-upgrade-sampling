@@ -43,36 +43,77 @@ export type NodeData =
     | FilterNodeData
     | DataSourceNodeData
     | DatasetNodeData;
+
+/** Sql */
 export type SqlNodeData = {
+    formData: SqlNodeFormData;
+};
+
+export type SqlNodeFormData = {
     name: string;
-    value: string;
 };
 
 export type Option = {
     value: string;
     label: string;
 }
+
+/** Select */
 export type SelectNodeData = {
-    name: string;
-    value: string;
-    options: Option[];
-}
+    formData: SelectNodeFormData;
+};
 
+export type SelectNodeFormData = {
+    name: string;
+};
+
+/** GroupBy */
 export type GroupByNodeData = {
-    name: string;
-}
+    formData: GroupByNodeFormData;
+};
 
+export type GroupByNodeFormData = {
+    name: string;
+};
+
+/** Join */
 export type JoinNodeData = {
-    name: string;
-}
+    formData: JoinNodeFormData;
+};
 
+export type JoinNodeFormData = {
+    name: string;
+};
+
+/** Filter */
 export type FilterNodeData = {
+    formData: FilterNodeFormData;
+};
+
+export type FilterNodeFormData = {
     name: string;
+};
+
+/** DataSource */
+export type DataSourceNodeData = {
+    formData: DataSourceNodeFormData;
+};
+
+export type DataSourceNodeFormData = {
+    name: string;
+};
+
+/** Dataset */
+export type DatasetNodeData = {
+    formData: DatasetNodeFormData;
+    detail: DatasetDetail;
 }
 
-export type DataSourceNodeData = {
+export type DatasetNodeFormData = {
     name: string;
-}
+    updateMode: UpdateMode;
+    fields: Array<DatasetField>;
+};
 
 export type UpdateMode = "replace" | "update";
 
@@ -80,17 +121,6 @@ export type DatasetField = {
     datasetId: string;
     sourceFieldId: string;
 };
-
-export type DatasetNodeFormData = {
-    updateMode: UpdateMode;
-    fields: Array<DatasetField>;
-};
-
-export type DatasetNodeData = {
-    name: string;
-    formData: DatasetNodeFormData;
-    detail: DatasetDetail;
-}
 
 export type EdgeProps = {
 }
@@ -158,8 +188,8 @@ const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> =
             id: datasetId,
             type: 'dataset',
             data: {
-                name: result.name,
                 formData: {
+                    name: result.name,
                     updateMode: "replace",
                     fields: result.fields.map((field) => ({
                         datasetId: field.id,
@@ -211,43 +241,15 @@ export const useVueflowController = () => {
             case "group_by":
             case "join":
             case "filter":
-            case "data_source": {
-                nodes.value.push({
-                    ...newNode,
-                    data: {
-                        name: newNode.type.toUpperCase(),
-                    }
-                });
-                break;
-            }
-            // case "dataset": {
-            //     nodes.value.push({
-            //         ...newNode,
-            //         data: {
-            //             name: newNode.type.toUpperCase(),
-            //             updateMode: "replace",
-            //         }
-            //     });
-            //     break;
-            // }
-            case "sql": {
-                nodes.value.push({
-                    ...newNode,
-                    data: {
-                        name: newNode.type.toUpperCase(),
-                        value: "",
-                    }
-                });
-                break;
-            }
-
+            case "data_source":
+            case "sql":
             case "select": {
                 nodes.value.push({
                     ...newNode,
                     data: {
-                        name: newNode.type.toUpperCase(),
-                        value: "",
-                        options: [],
+                        formData: {
+                            name: newNode.type.toUpperCase(),
+                        }
                     }
                 });
                 break;
