@@ -440,12 +440,12 @@ export const useVueflowHistoryController = (target: ComputedRef<HistoryTarget>, 
 
     const onUndo = () => {
         original.undo();
-        options?.updateObject(original.last.value.snapshot);
+        options?.updateObject(JSON.parse(JSON.stringify(original.last.value.snapshot)));
     }
 
     const onRedo = () => {
         original.redo();
-        options?.updateObject(original.last.value.snapshot);
+        options?.updateObject(JSON.parse(JSON.stringify(original.last.value.snapshot)));
     }
 
     return {
