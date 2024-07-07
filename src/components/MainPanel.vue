@@ -12,7 +12,14 @@
     @nodes-change="onNodesChange"
     @edges-change="onEdgesChange"
   >
-    <controller-panel :can-undo="canUndo" :can-redo="canRedo" @undo="$emit('undo')" @redo="$emit('redo')" />
+    <controller-panel
+      :can-undo="canUndo"
+      :can-redo="canRedo"
+      @undo="$emit('undo')"
+      @redo="$emit('redo')"
+      @zoom-in="onZoomIn"
+      @zoom-out="onZoomOut"
+    />
     <template #node-sql="{ id, type, data }">
       <node-item
         :id="id"
@@ -143,6 +150,18 @@ const onEdgesChange = (values: Array<EdgeChange>) => {
     emits("remove:edges", removeEdgeIds);
   }
 };
+
+const onZoomIn = () => {
+  if(vueFlowRef.value) {
+    vueFlowRef.value.zoomIn();
+  }
+}
+
+const onZoomOut = () => {
+  if(vueFlowRef.value) {
+    vueFlowRef.value.zoomOut();
+  }
+}
 </script>
 
 <style scoped lang="scss"></style>

@@ -2,9 +2,13 @@
   <panel
     position="top-left"
     class="controller-panel">
-    <div>
+    <div class="history">
       <el-button type="primary" :icon="Back" :disabled="!canUndo" @click="$emit('undo')" />
       <el-button type="primary" :icon="Right" :disabled="!canRedo" @click="$emit('redo')" />
+    </div>
+    <div class="zoom">
+      <el-button type="primary" :icon="ZoomOut" @click="$emit('zoomOut')" />
+      <el-button type="primary" :icon="ZoomIn" @click="$emit('zoomIn')" />
     </div>
   </panel>
   
@@ -12,7 +16,7 @@
 
 <script setup lang="ts">
 import { ElButton } from "element-plus";
-import { Back, Right } from '@element-plus/icons-vue'
+import { Back, Right, ZoomOut, ZoomIn } from '@element-plus/icons-vue'
 import { Panel } from "@vue-flow/core";
 defineProps<{
   canRedo: boolean,
@@ -22,5 +26,16 @@ defineProps<{
 defineEmits<{
   (e: "undo"): void;
   (e: "redo"): void;
+  (e: "zoomOut"): void;
+  (e: "zoomIn"): void;
 }>();
 </script>
+
+<style scoped lang="scss">
+.controller-panel {
+  display: flex;
+  flex-direction: row;
+
+  gap: 16px;
+}
+</style>
