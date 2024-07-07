@@ -12,6 +12,7 @@
     @nodes-change="onNodesChange"
     @edges-change="onEdgesChange"
   >
+    <controller-panel :can-undo="canUndo" :can-redo="canRedo" @undo="$emit('undo')" @redo="$emit('redo')" />
     <template #node-sql="{ id, type, data }">
       <node-item
         :id="id"
@@ -93,10 +94,13 @@ import {
   MenuType,
 } from "@/composables/use-vueflow-controller";
 import NodeItem from "@/components/nodes/NodeItem.vue";
+import ControllerPanel from "@/components/mainPanel/ControllerPanel.vue";
 import { ref, watch } from "vue";
 defineProps<{
   nodes: Array<Node>;
   edges: Array<Edge>;
+  canUndo: boolean;
+  canRedo: boolean;
   panelDimensions: Dimensions;
 }>();
 
@@ -110,6 +114,8 @@ const emits = defineEmits<{
   (e: "remove:nodes", removeNodeIds: Array<string>): void;
   (e: "remove:edges", removeEdgeIds: Array<string>): void;
   (e: "click:menu", menu: MenuType, nodeId: string): void;
+  (e: "undo"): void;
+  (e: "redo"): void;
 }>();
 
 const vueFlowRef = ref<InstanceType<typeof VueFlow>>();

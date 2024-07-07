@@ -9,6 +9,8 @@
         <main-panel
           :nodes="nodes"
           :edges="edges"
+          :can-undo="canUndo"
+          :can-redo="canRedo"
           v-model:panel-dimensions="panelDimensions"
           @node-drag-stop="handleNodeDragStop"
           @drag-over="onDragOver"
@@ -18,6 +20,8 @@
           @remove:nodes="onRemoveNodes"
           @remove:edges="onRemoveEdges"
           @click:menu="onClickMenu"
+          @undo="onUndo"
+          @redo="onRedo"
         />
       </el-main>
     </el-container>
@@ -35,7 +39,9 @@ import SideBar from "@/components/SideBar.vue";
 import {
   useDragAndDrop,
   useVueflowController,
+  useVueflowHistoryController,
 } from "@/composables/use-vueflow-controller";
+import { computed } from "vue";
 
 const {
   panelDimensions,
@@ -53,7 +59,21 @@ const {
   closeDetailEditor,
   saveNode,
   isRealInit,
-} = useVueflowController();
+} = useVueflowController({ updateHistory: () => commit() });
+
+const target = computed(() => {
+  return {
+    nodes : nodes.value,
+    edges : edges.value,
+  }
+})
+
+const { commit, onUndo, onRedo, canUndo, canRedo } = useVueflowHistoryController(target, {
+  updateObject: (object) => {
+    nodes.value = object.nodes;
+    edges.value = object.edges;
+  }
+})
 
 const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
   addNode: onAddNode,

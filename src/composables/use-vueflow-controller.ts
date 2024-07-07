@@ -1,8 +1,9 @@
 import { Node as NodeOriginal, Edge as EdgeOriginal, useVueFlow } from "@vue-flow/core"
-import { ref, watch } from "vue";
+import { ComputedRef, ref, watch, computed } from "vue";
 import { useId } from "@/composables/use-id";
 import invariant from "tiny-invariant";
 import { sleep } from "@/utils/util";
+import { useManualRefHistory } from "@vueuse/core";
 
 export type { NodeChange, EdgeChange } from "@vue-flow/core";
 
@@ -206,21 +207,25 @@ const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> =
     ];
 }
 
-export const useVueflowController = () => {
+export const useVueflowController = (history: {
+    updateHistory: () => void;
+}) => {
 
     const original = useVueFlow();
 
+    const nodes = ref<Array<Node>>([]);
+    const edges = ref<Array<Edge>>([]);
+    
     const panelDimensions = ref<Dimensions>({
         width: 0,
         height: 0,
     });
-    const nodes = ref<Array<Node>>([]);
-    const edges = ref<Array<Edge>>([]);
 
     const isRealInit = ref<boolean>(false);
     const onInitialized = async () => {
         nodes.value = await getInitNodes(panelDimensions.value)
         isRealInit.value = true;
+        history.updateHistory();
     }
 
     const findNode = (nodeId: string) => {
@@ -235,6 +240,7 @@ export const useVueflowController = () => {
         const tIdx = nodes.value.findIndex((node) => node.id === nodeId);
         if (tIdx !== -1) {
             nodes.value[tIdx].position = newPosition;
+            history.updateHistory();
         }
     }
 
@@ -254,6 +260,7 @@ export const useVueflowController = () => {
                         }
                     }
                 });
+                history.updateHistory();
                 break;
             }
         }
@@ -263,6 +270,7 @@ export const useVueflowController = () => {
         const { node, index } = findNode(nodeId);
         invariant((node && index !== -1));
         nodes.value[index] = nodeUpdate(node);
+        history.updateHistory();
     }
 
     const onAddEdge = (value: Connection) => {
@@ -273,13 +281,16 @@ export const useVueflowController = () => {
             source: value.source,
             target: value.target,
         });
+        history.updateHistory();
     }
     const onRemoveNodes = (removeNodeIds: Array<string>) => {
         nodes.value = nodes.value.filter((node) => !removeNodeIds.includes(node.id));
+        history.updateHistory();
     }
 
     const onRemoveEdges = (removeEdgeIds: Array<string>) => {
         edges.value = edges.value.filter((edge) => !removeEdgeIds.includes(edge.id));
+        history.updateHistory();
     }
 
     const onClickMenu = (menu: MenuType, nodeId: string) => {
@@ -314,6 +325,7 @@ export const useVueflowController = () => {
         invariant(index !== -1);
         nodes.value[index] = newNode;
         original.updateNode(newNode.id, { data: { ...newNode.data } });
+        history.updateHistory();
     }
 
     return {
@@ -410,5 +422,38 @@ export const useDragAndDrop = (
         onDragLeave,
         onDragOver,
         onDrop,
+    }
+}
+
+
+type HistoryTarget = {
+    nodes: Array<Node>;
+    edges: Array<Edge>;
+};
+
+export const useVueflowHistoryController = (target: ComputedRef<HistoryTarget>, options?: {
+    updateObject: (currentObject: HistoryTarget) => void;
+}) => {
+    const original = useManualRefHistory(target, { clone: true });
+    const history = computed(() => original.history.value.length > 1 ? original.history.value.splice(1) : []);
+    const canUndo = computed(() => original.undoStack.value.length > 1)
+
+    const onUndo = () => {
+        original.undo();
+        options?.updateObject(original.last.value.snapshot);
+    }
+
+    const onRedo = () => {
+        original.redo();
+        options?.updateObject(original.last.value.snapshot);
+    }
+
+    return {
+        history,
+        commit: original.commit,
+        onUndo,
+        onRedo,
+        canUndo,
+        canRedo: original.canRedo,
     }
 }
