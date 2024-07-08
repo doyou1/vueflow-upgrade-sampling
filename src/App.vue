@@ -1,84 +1,32 @@
 <template>
   <el-container class="wrap conatiner">
     <el-header class="header">Header</el-header>
-    <el-container v-loading="!isRealInit" v-show="targetNode === undefined" class="container">
-      <el-aside class="aside" width="200px">
-        <side-bar @drag-start="onDragStart" />
-      </el-aside>
-      <el-main class="main" @drop="onDrop">
+    <el-container v-loading="!isRealInit"class="container">
+      <el-main class="main">
         <main-panel
           :nodes="nodes"
           :edges="edges"
-          :can-undo="canUndo"
-          :can-redo="canRedo"
           v-model:panel-dimensions="panelDimensions"
-          @node-drag-stop="handleNodeDragStop"
-          @drag-over="onDragOver"
-          @drag-leave="onDragLeave"
           @initialized="onInitialized"
-          @add-edge="onAddEdge"
-          @remove:nodes="onRemoveNodes"
-          @remove:edges="onRemoveEdges"
-          @click:menu="onClickMenu"
-          @undo="onUndo"
-          @redo="onRedo"
         />
       </el-main>
-    </el-container>
-    <el-container v-show="targetNode" class="container">
-      <detail-editor-container v-if="targetNode" :target-node="targetNode" @close="closeDetailEditor" @save="saveNode($event); closeDetailEditor();"/>
     </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { ElContainer, ElHeader, ElAside, ElMain } from "element-plus";
-import DetailEditorContainer from "@/components/DetailEditorContainer.vue";
+import { ElContainer, ElHeader, ElMain } from "element-plus";
 import MainPanel from "@/components/MainPanel.vue";
-import SideBar from "@/components/SideBar.vue";
 import {
-  useDragAndDrop,
   useVueflowController,
-  useVueflowHistoryController,
 } from "@/composables/use-vueflow-controller";
-import { computed } from "vue";
-
 const {
-  panelDimensions,
   nodes,
   edges,
-  handleNodeDragStop,
-  onAddNode,
-  onUpdateNode,
-  onInitialized,
-  onAddEdge,
-  onRemoveNodes,
-  onRemoveEdges,
-  onClickMenu,
-  targetNode,
-  closeDetailEditor,
-  saveNode,
+  panelDimensions,
   isRealInit,
-} = useVueflowController({ updateHistory: () => commit() });
-
-const target = computed(() => {
-  return {
-    nodes : nodes.value,
-    edges : edges.value,
-  }
-})
-
-const { commit, onUndo, onRedo, canUndo, canRedo } = useVueflowHistoryController(target, {
-  updateObject: (object) => {
-    nodes.value = object.nodes;
-    edges.value = object.edges;
-  }
-})
-
-const { onDragStart, onDragLeave, onDragOver, onDrop } = useDragAndDrop({
-  addNode: onAddNode,
-  updateNode: onUpdateNode,
-});
+  onInitialized,
+} = useVueflowController();
 </script>
 
 <style scoped lang="scss">

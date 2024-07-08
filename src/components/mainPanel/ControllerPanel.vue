@@ -2,10 +2,10 @@
   <panel
     position="top-left"
     class="controller-panel">
-    <div class="history">
+    <!-- <div class="history">
       <el-button type="primary" :icon="Back" :disabled="!canUndo" @click="$emit('undo')" />
       <el-button type="primary" :icon="Right" :disabled="!canRedo" @click="$emit('redo')" />
-    </div>
+    </div> -->
     <div class="zoom">
       <el-button type="primary" :icon="ZoomOut" @click="$emit('zoomOut')" />
       <el-button type="primary" :icon="ZoomIn" @click="$emit('zoomIn')" />
@@ -16,12 +16,12 @@
 
 <script setup lang="ts">
 import { ElButton } from "element-plus";
-import { Back, Right, ZoomOut, ZoomIn } from '@element-plus/icons-vue'
+import { ZoomOut, ZoomIn } from '@element-plus/icons-vue'
 import { Panel } from "@vue-flow/core";
-defineProps<{
-  canRedo: boolean,
-  canUndo: boolean,
-}>();
+// defineProps<{
+//   canRedo: boolean,
+//   canUndo: boolean,
+// }>();
 
 defineEmits<{
   (e: "undo"): void;

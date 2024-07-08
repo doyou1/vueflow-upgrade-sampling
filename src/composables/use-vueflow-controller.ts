@@ -2,7 +2,6 @@ import { Node as NodeOriginal, Edge as EdgeOriginal, useVueFlow } from "@vue-flo
 import { ComputedRef, ref, watch, computed } from "vue";
 import { useId } from "@/composables/use-id";
 import invariant from "tiny-invariant";
-import { sleep } from "@/utils/util";
 import { useManualRefHistory } from "@vueuse/core";
 
 export type { NodeChange, EdgeChange } from "@vue-flow/core";
@@ -12,12 +11,13 @@ export type Elements = (Node | Edge)[];
 export type Node = NodeWrap & NodeProps;
 export type Edge = EdgeOriginal & EdgeProps;
 
-export type NodeWrap = SqlNode | SelectNode | GroupByNode | JoinNode | FilterNode | DataSourceNode | DatasetNode;
+export type NodeWrap = SqlNode | SelectNode | GroupByNode | JoinNode | FilterNode | DataSourceNode | DatasetNode | StartNode;
 
 export type NodeProps = {
     position: XYPosition;
     type: NodeType;
     deletable?: boolean;
+    children: Array<string>;
 }
 
 export type NodeType =
@@ -27,7 +27,8 @@ export type NodeType =
     | "join"
     | "filter"
     | "data_source"
-    | "dataset";
+    | "dataset"
+    | "start";
 export type SqlNode = NodeOriginal<SqlNodeData, any, "sql">
 export type SelectNode = NodeOriginal<SelectNodeData, any, "select">
 export type GroupByNode = NodeOriginal<GroupByNodeData, any, "group_by">
@@ -35,6 +36,7 @@ export type JoinNode = NodeOriginal<JoinNodeData, any, "join">
 export type FilterNode = NodeOriginal<FilterNodeData, any, "filter">
 export type DataSourceNode = NodeOriginal<DataSourceNodeData, any, "data_source">
 export type DatasetNode = NodeOriginal<DatasetNodeData, any, "dataset">
+export type StartNode = NodeOriginal<StartNodeData, any, "start">
 
 export type NodeData =
     | SqlNodeData
@@ -43,7 +45,17 @@ export type NodeData =
     | JoinNodeData
     | FilterNodeData
     | DataSourceNodeData
-    | DatasetNodeData;
+    | DatasetNodeData
+    | StartNodeData;
+
+/** Start */
+export type StartNodeData = {
+    formData: StartNodeFormData;
+};
+
+export type StartNodeFormData = {
+    name: string;
+};
 
 /** Sql */
 export type SqlNodeData = {
@@ -160,46 +172,19 @@ export type DatasetDetail = {
     fields: Array<DatasetDetailField>
 }
 
-const getDatasetDetail = async (datasetId: string): Promise<DatasetDetail> => {
-    await sleep(1000);
-    return {
-        id: datasetId,
-        name: "temp dataset1",
-        fields: [
-            {
-                id: "field1",
-                name: "Field1",
-            },
-            {
-                id: "field2",
-                name: "Field2",
-            },
-        ],
-    }
-
-}
-
 const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> => {
-    // const { generate } = useId();
-    const datasetId = "dataset-1";
-    const result = await getDatasetDetail(datasetId);
     return [
         {
             // id: generate(),
-            id: datasetId,
-            type: 'dataset',
+            id: "start",
+            type: 'start',
             data: {
                 formData: {
-                    name: result.name,
-                    updateMode: "replace",
-                    fields: result.fields.map((field) => ({
-                        datasetId: field.id,
-                        sourceFieldId: ""
-                    })),
+                    name: "START",
                 },
-                detail: result,
             },
-            position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: Math.floor(panelDimensions.height * (2 / 3) - SIZE.HEIGHT / 2) },
+            children: [],
+            position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: 100 },
             deletable: false,
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
@@ -207,15 +192,13 @@ const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> =
     ];
 }
 
-export const useVueflowController = (history: {
-    updateHistory: () => void;
-}) => {
+export const useVueflowController = () => {
 
     const original = useVueFlow();
 
     const nodes = ref<Array<Node>>([]);
     const edges = ref<Array<Edge>>([]);
-    
+
     const panelDimensions = ref<Dimensions>({
         width: 0,
         height: 0,
@@ -225,7 +208,6 @@ export const useVueflowController = (history: {
     const onInitialized = async () => {
         nodes.value = await getInitNodes(panelDimensions.value)
         isRealInit.value = true;
-        history.updateHistory();
     }
 
     const findNode = (nodeId: string) => {
@@ -240,7 +222,6 @@ export const useVueflowController = (history: {
         const tIdx = nodes.value.findIndex((node) => node.id === nodeId);
         if (tIdx !== -1) {
             nodes.value[tIdx].position = newPosition;
-            history.updateHistory();
         }
     }
 
@@ -260,7 +241,6 @@ export const useVueflowController = (history: {
                         }
                     }
                 });
-                history.updateHistory();
                 break;
             }
         }
@@ -270,27 +250,22 @@ export const useVueflowController = (history: {
         const { node, index } = findNode(nodeId);
         invariant((node && index !== -1));
         nodes.value[index] = nodeUpdate(node);
-        history.updateHistory();
     }
 
     const onAddEdge = (value: Connection) => {
         const { generate } = useId();
-
         edges.value.push({
             id: generate(),
             source: value.source,
             target: value.target,
         });
-        history.updateHistory();
     }
     const onRemoveNodes = (removeNodeIds: Array<string>) => {
         nodes.value = nodes.value.filter((node) => !removeNodeIds.includes(node.id));
-        history.updateHistory();
     }
 
     const onRemoveEdges = (removeEdgeIds: Array<string>) => {
         edges.value = edges.value.filter((edge) => !removeEdgeIds.includes(edge.id));
-        history.updateHistory();
     }
 
     const onClickMenu = (menu: MenuType, nodeId: string) => {
@@ -325,7 +300,6 @@ export const useVueflowController = (history: {
         invariant(index !== -1);
         nodes.value[index] = newNode;
         original.updateNode(newNode.id, { data: { ...newNode.data } });
-        history.updateHistory();
     }
 
     return {
@@ -411,6 +385,7 @@ export const useDragAndDrop = (
             id: generate(),
             type: draggedType.value,
             position,
+            children: [],
         }
         options?.addNode(newNode);
     }

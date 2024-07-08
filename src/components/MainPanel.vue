@@ -3,86 +3,18 @@
     ref="vueFlowRef"
     :nodes="nodes"
     :edges="edges"
-    @node-drag-stop="
-      $emit('nodeDragStop', $event.node.id, $event.node.position)
-    "
-    @dragover="$emit('dragOver', $event)"
-    @dragleave="$emit('dragLeave', $event)"
-    @connect="$emit('addEdge', $event)"
     @nodes-change="onNodesChange"
     @edges-change="onEdgesChange"
   >
     <controller-panel
-      :can-undo="canUndo"
-      :can-redo="canRedo"
-      @undo="$emit('undo')"
-      @redo="$emit('redo')"
       @zoom-in="onZoomIn"
       @zoom-out="onZoomOut"
     />
-    <template #node-sql="{ id, type, data }">
-      <node-item
+    <template #node-start="{ id, type, data }">
+      <start-node-item
         :id="id"
         :type="type"
         :name="data.formData.name"
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
-      />
-    </template>
-    <template #node-select="{ id, type, data }">
-      <node-item
-        :id="id"
-        :type="type"
-        :name="data.formData.name"
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
-      />
-    </template>
-    <template #node-group_by="{ id, type, data }">
-      <node-item
-        :id="id"
-        :type="type"
-        :name="data.formData.name"
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
-      />
-    </template>
-    <template #node-join="{ id, type, data }">
-      <node-item
-        :id="id"
-        :type="type"
-        :name="data.formData.name"
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
-      />
-    </template>
-    <template #node-filter="{ id, type, data }">
-      <node-item
-        :id="id"
-        :type="type"
-        :name="data.formData.name"
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
-      />
-    </template>
-    <template #node-data_source="{ id, type, data }">
-      <node-item
-        :id="id"
-        :type="type"
-        :name="data.formData.name"
-        hide-top-handle
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
-      />
-    </template>
-    <template #node-dataset="{ id, type, data }">
-      <node-item
-        :id="id"
-        :type="type"
-        :name="data.formData.name"
-        hide-bottom-handle
-        @dblclick="$emit('click:menu', 'detail', id)"
-        @click:menu="$emit('click:menu', $event, id)"
       />
     </template>
   </vue-flow>
@@ -93,36 +25,26 @@ import { VueFlow } from "@vue-flow/core";
 import {
   Node,
   Edge,
-  XYPosition,
   Dimensions,
-  Connection,
   NodeChange,
   EdgeChange,
-  MenuType,
 } from "@/composables/use-vueflow-controller";
-import NodeItem from "@/components/nodes/NodeItem.vue";
+import StartNodeItem from "@/components/nodes/StartNodeItem.vue";
 import ControllerPanel from "@/components/mainPanel/ControllerPanel.vue";
 import { ref, watch } from "vue";
 defineProps<{
   nodes: Array<Node>;
   edges: Array<Edge>;
-  canUndo: boolean;
-  canRedo: boolean;
+  // canUndo: boolean;
+  // canRedo: boolean;
   panelDimensions: Dimensions;
 }>();
 
 const emits = defineEmits<{
-  (e: "nodeDragStop", nodeId: string, newPosition: XYPosition): void;
-  (e: "dragOver", event: DragEvent): void;
-  (e: "dragLeave", event: DragEvent): void;
   (e: "update:panelDimensions", value: Dimensions): void;
   (e: "initialized"): void;
-  (e: "addEdge", value: Connection): void;
   (e: "remove:nodes", removeNodeIds: Array<string>): void;
   (e: "remove:edges", removeEdgeIds: Array<string>): void;
-  (e: "click:menu", menu: MenuType, nodeId: string): void;
-  (e: "undo"): void;
-  (e: "redo"): void;
 }>();
 
 const vueFlowRef = ref<InstanceType<typeof VueFlow>>();
