@@ -18,6 +18,7 @@ export type NodeProps = {
     type: NodeType;
     deletable?: boolean;
     children: Array<string>;
+    parent: Array<string>;
 }
 
 export type NodeType =
@@ -145,7 +146,8 @@ export type XYPosition = {
 
 export enum SIZE {
     WIDTH = 150,
-    HEIGHT = 50
+    HEIGHT = 50,
+    GAP = 80
 }
 
 export type Dimensions = {
@@ -184,6 +186,7 @@ const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> =
                 },
             },
             children: [],
+            parent: [],
             position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: 100 },
             deletable: false,
             width: SIZE.WIDTH,
@@ -195,6 +198,7 @@ const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> =
 export const useVueflowController = () => {
 
     const original = useVueFlow();
+    const { generate } = useId();
 
     const nodes = ref<Array<Node>>([]);
     const edges = ref<Array<Edge>>([]);
@@ -219,27 +223,43 @@ export const useVueflowController = () => {
 
     /** update position value */
     const handleNodeDragStop = (nodeId: string, newPosition: XYPosition) => {
-        const tIdx = nodes.value.findIndex((node) => node.id === nodeId);
-        if (tIdx !== -1) {
-            nodes.value[tIdx].position = newPosition;
-        }
+        onUpdateNode(nodeId, (node) => ({...node, position: newPosition}));
     }
 
-    const onAddNode = (newNode: Node) => {
-        switch (newNode.type) {
+    const onAddChildNode = (type: string, source: string) => {
+        switch (type) {
             case "group_by":
             case "join":
             case "filter":
+            case "dataset":
             case "data_source":
             case "sql":
             case "select": {
-                nodes.value.push({
-                    ...newNode,
-                    data: {
-                        formData: {
-                            name: newNode.type.toUpperCase(),
-                        }
-                    }
+
+                const { node: parent } = findNode(source);
+                invariant(parent !== undefined);
+                
+                const position = {
+                    x: parent.position.x,
+                    y: parent.position.y + SIZE.HEIGHT + SIZE.GAP
+                }
+                const newNode: Node = {
+                    id: generate(),
+                    type: type,
+                    position,
+                    children: [],
+                    parent: [source],
+                }
+
+                /** add new node */
+                nodes.value.push(newNode);
+                /** add as a child of the parent node */
+                onUpdateNode(source, (node) => ({...node, children: [...node.children, newNode.id]}));
+                /** add new Edge new node to parent */
+                edges.value.push({
+                    id: generate(),
+                    source: source,
+                    target: newNode.id,
                 });
                 break;
             }
@@ -308,7 +328,7 @@ export const useVueflowController = () => {
         edges,
         handleNodeDragStop,
         onInitialized,
-        onAddNode,
+        onAddChildNode,
         onUpdateNode,
         onAddEdge,
         onRemoveNodes,
@@ -386,6 +406,7 @@ export const useDragAndDrop = (
             type: draggedType.value,
             position,
             children: [],
+            parent: [],
         }
         options?.addNode(newNode);
     }

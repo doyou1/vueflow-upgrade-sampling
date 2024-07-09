@@ -7,7 +7,9 @@
           :nodes="nodes"
           :edges="edges"
           v-model:panel-dimensions="panelDimensions"
+          @node-drag-stop="handleNodeDragStop"
           @initialized="onInitialized"
+          @add:child-node="onAddChildNode"
         />
       </el-main>
     </el-container>
@@ -26,6 +28,8 @@ const {
   panelDimensions,
   isRealInit,
   onInitialized,
+  onAddChildNode,
+  handleNodeDragStop,
 } = useVueflowController();
 </script>
 

@@ -13,7 +13,7 @@
         {{ name }}
       </div>
     </div>
-    <node-handle class="target-handle" type="target" />
+    <node-handle class="target-handle" type="target" @click:child-node="$emit('add:childNode', $event)"/>
   </div>
 </template>
 
@@ -26,6 +26,10 @@ import NodeHandle from "@/components/nodes/NodeHandle.vue";
 defineProps<{
   id: string;
   name: string;
+}>();
+
+defineEmits<{
+  (e: "add:childNode", type: string): void;
 }>();
 
 const isHover = ref<boolean>(false);

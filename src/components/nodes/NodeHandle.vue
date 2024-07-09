@@ -1,5 +1,5 @@
 <template>
-  <el-popover :placement="type === 'target' ? 'bottom' : 'top'" trigger="click">
+  <el-popover ref="listRef" :placement="type === 'target' ? 'bottom' : 'top'" trigger="click" :show-after="100" :hide-after="100">
     <template #reference>
       <Handle
         :class="['handle', type]"
@@ -11,9 +11,9 @@
     </template>
     <template #default>
       <div class="items">
-        <el-popover v-for="item in items" placement="right" trigger="hover">
+        <el-popover ref="detailRefs" v-for="item in items" placement="right" trigger="hover" :show-after="100" :hide-after="100">
           <template #reference>
-            <div class="item">
+            <div class="item" @click="$emit('click:childNode', item.type); hidePopovers();">
               <div class="icon">
                 <icon-sql v-if="item.type === 'sql'" />
                 <icon-select v-else-if="item.type === 'select'" />
@@ -51,7 +51,7 @@
 import { Handle, Position } from "@vue-flow/core";
 import { ElIcon, ElPopover } from "element-plus";
 import { CirclePlus } from "@element-plus/icons-vue";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import IconSql from "@/components/icons/IconSql.vue";
 import IconSelect from "@/components/icons/IconSelect.vue";
 import IconGroupBy from "@/components/icons/IconGroupBy.vue";
@@ -64,45 +64,57 @@ defineProps<{
   type: "target" | "source";
 }>();
 
+defineEmits<{
+  (e: "click:childNode", type: string): void;
+}>();
+
+const listRef = ref();
+const detailRefs = ref();
+
+const hidePopovers = () => {
+  listRef.value?.hide();
+  detailRefs.value?.forEach((ref: any) => ref?.hide());
+};
+
 const items = computed(() => [
   {
-    type: "sql",
+    type: "data_source",
     onClick: () => {},
     label: "DataSource",
     description: "This is DataSource Detail",
   },
   {
-    type: "select",
+    type: "dataset",
     onClick: () => {},
     label: "Dataset",
     description: "This is Dataset Detail",
   },
   {
-    type: "group_by",
+    type: "filter",
     onClick: () => {},
     label: "Filter",
     description: "This is Filter Detail",
   },
   {
-    type: "join",
+    type: "group_by",
     onClick: () => {},
     label: "GroupBy",
     description: "This is GroupBy Detail",
   },
   {
-    type: "filter",
+    type: "join",
     onClick: () => {},
     label: "Join",
     description: "This is Join Detail",
   },
   {
-    type: "data_source",
+    type: "select",
     onClick: () => {},
     label: "Select",
     description: "This is Select Detail",
   },
   {
-    type: "dataset",
+    type: "sql",
     onClick: () => {},
     label: "Sql",
     description: "This is Sql Detail",
