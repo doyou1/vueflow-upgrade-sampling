@@ -10,12 +10,10 @@
     @edges-change="onEdgesChange"
   >
     <controller-panel @zoom-in="onZoomIn" @zoom-out="onZoomOut" />
-    <template #node-start="{ id, type, data }">
+    <template #node-start="{ id, data }">
       <start-node-item
-        :id="id"
-        :type="type"
         :name="data.formData.name"
-        @add:child-node="$emit('add:childNode', $event, id)"
+        @click="handleClickNode(id)"
       />
     </template>
     <template #node-sql="{ type }">
@@ -39,6 +37,8 @@
     <template #node-dataset="{ type }">
       {{ type }}
     </template>
+
+    <detail-editor-panel v-if="targetNode" :target-node="targetNode" @close="targetNode = undefined;"/>
   </vue-flow>
 </template>
 
@@ -54,8 +54,9 @@ import {
 } from "@/composables/use-vueflow-controller";
 import StartNodeItem from "@/components/nodes/StartNodeItem.vue";
 import ControllerPanel from "@/components/mainPanel/ControllerPanel.vue";
+import DetailEditorPanel from "@/components/mainPanel/DetailEditorPanel.vue";
 import { ref, watch } from "vue";
-defineProps<{
+const props = defineProps<{
   nodes: Array<Node>;
   edges: Array<Edge>;
   // canUndo: boolean;
@@ -109,6 +110,14 @@ const onZoomOut = () => {
     vueFlowRef.value.zoomOut();
   }
 };
+
+const targetNode = ref<Node | undefined>(undefined);
+const handleClickNode = (nodeId: string) => {
+  const node = props.nodes.find((v) => v.id === nodeId);
+  if (node) {
+    targetNode.value = node;
+  }
+}
 </script>
 
 <style scoped lang="scss"></style>

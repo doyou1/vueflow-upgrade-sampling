@@ -172,7 +172,7 @@ export type DatasetDetail = {
     id: string,
     name: string,
     fields: Array<DatasetDetailField>
-}
+};
 
 const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> => {
     return [
