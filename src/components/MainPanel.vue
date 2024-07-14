@@ -11,13 +11,19 @@
   >
     <controller-panel @zoom-in="onZoomIn" @zoom-out="onZoomOut" />
     <template #node-start="{ id, data }">
-      <start-node-item
+      <start-node
         :name="data.formData.name"
-        @click="handleClickNode(id)"
+        @click:node="handleClickNode(id)"
+        @add:child-node="$emit('add:childNode',$event, id)"
       />
     </template>
-    <template #node-sql="{ type }">
-      {{ type }}
+    <template #node-sql="{ id, data }">
+      <sql-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="$emit('add:parentNode',$event, id)"
+        @add:child-node="$emit('add:childNode',$event, id)"
+      />
     </template>
     <template #node-select="{ type }">
       {{ type }}
@@ -52,15 +58,14 @@ import {
   EdgeChange,
   XYPosition,
 } from "@/composables/use-vueflow-controller";
-import StartNodeItem from "@/components/nodes/StartNodeItem.vue";
+import StartNode from "@/components/nodes/StartNode.vue";
+import SqlNode from "@/components/nodes/SqlNode.vue";
 import ControllerPanel from "@/components/mainPanel/ControllerPanel.vue";
 import DetailEditorPanel from "@/components/mainPanel/DetailEditorPanel.vue";
 import { ref, watch } from "vue";
 const props = defineProps<{
   nodes: Array<Node>;
   edges: Array<Edge>;
-  // canUndo: boolean;
-  // canRedo: boolean;
   panelDimensions: Dimensions;
 }>();
 
@@ -70,7 +75,8 @@ const emits = defineEmits<{
   (e: "nodeDragStop", nodeId: string, newPosition: XYPosition): void;
   (e: "remove:nodes", removeNodeIds: Array<string>): void;
   (e: "remove:edges", removeEdgeIds: Array<string>): void;
-  (e: "add:childNode", type: string, source: string): void;
+  (e: "add:parentNode", type: string, childNodeId: string): void;
+  (e: "add:childNode", type: string, parentNodeId: string): void;
 }>();
 
 const vueFlowRef = ref<InstanceType<typeof VueFlow>>();
@@ -78,7 +84,7 @@ const vueFlowRef = ref<InstanceType<typeof VueFlow>>();
 watch(vueFlowRef, () => {
   if (vueFlowRef.value) {
     emits("update:panelDimensions", vueFlowRef.value.dimensions);
-    emits("initialized");
+    if (vueFlowRef.value.dimensions.height > 500) emits("initialized");
   }
 });
 

@@ -10,6 +10,7 @@
           @node-drag-stop="handleNodeDragStop"
           @initialized="onInitialized"
           @add:child-node="onAddChildNode"
+          @add:parent-node="onAddParentNode"
         />
       </el-main>
     </el-container>
@@ -29,6 +30,7 @@ const {
   isRealInit,
   onInitialized,
   onAddChildNode,
+  onAddParentNode,
   handleNodeDragStop,
 } = useVueflowController();
 </script>

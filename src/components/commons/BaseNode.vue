@@ -1,7 +1,11 @@
 <template>
   <div class="base-node" :style="innerStyle">
-    <Handle v-if="visibleSourceHandle" type="source" :position="Position.Top" />
-    <div class="content">
+    <base-handle
+      v-if="visibleSourceHandle"
+      type="source"
+      @add:parent-node="$emit('add:parentNode', $event)"
+    />
+    <div class="content" @click="$emit('click:node')">
       <div class="icon">
         <slot name="icon" />
       </div>
@@ -9,18 +13,18 @@
         <slot name="name" />
       </div>
     </div>
-    <Handle
+    <base-handle
       v-if="visibleTargetHandle"
       type="target"
-      :position="Position.Bottom"
+      @add:child-node="$emit('add:childNode', $event)"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { Handle, Position } from "@vue-flow/core";
 import { computed } from "vue";
 import { SIZE } from "@/composables/use-vueflow-controller";
+import BaseHandle from "@/components/commons/BaseHandle.vue";
 withDefaults(
   defineProps<{
     visibleSourceHandle?: boolean;
@@ -33,7 +37,9 @@ withDefaults(
 );
 
 const emits = defineEmits<{
-//   (e: "click:menu", type: MenuType): void;
+  (e: "click:node"): void;
+  (e: "add:parentNode", type: string): void;
+  (e: "add:childNode", type: string): void;
 }>();
 
 

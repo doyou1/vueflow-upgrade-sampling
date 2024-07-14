@@ -1,19 +1,34 @@
 <template>
-  <el-popover ref="listRef" :placement="type === 'target' ? 'bottom' : 'top'" trigger="click" :show-after="100" :hide-after="100">
+  <el-popover
+    ref="listRef"
+    trigger="click"
+    :placement="type === 'target' ? 'bottom' : 'top'"
+    :show-after="100"
+    :hide-after="100"
+  >
     <template #reference>
       <Handle
         :class="['handle', type]"
         :type="type"
         :position="type === 'target' ? Position.Bottom : Position.Top"
       >
-        <el-icon><CirclePlus /></el-icon>
+        <div class="icon">
+          <el-icon><circle-plus /></el-icon>
+        </div>
       </Handle>
     </template>
     <template #default>
       <div class="items">
-        <el-popover ref="detailRefs" v-for="item in items" placement="right" trigger="hover" :show-after="100" :hide-after="100">
+        <el-popover
+          ref="detailRefs"
+          v-for="item in items"
+          placement="right"
+          trigger="hover"
+          :show-after="100"
+          :hide-after="100"
+        >
           <template #reference>
-            <div class="item" @click="$emit('click:childNode', item.type); hidePopovers();">
+            <div class="item" @click="handleClickItem(item.type)">
               <div class="icon">
                 <icon-sql v-if="item.type === 'sql'" />
                 <icon-select v-else-if="item.type === 'select'" />
@@ -21,7 +36,6 @@
                 <icon-join v-else-if="item.type === 'join'" />
                 <icon-filter v-else-if="item.type === 'filter'" />
                 <icon-data-source v-else-if="item.type === 'data_source'" />
-                <icon-dataset v-else-if="item.type === 'dataset'" />
               </div>
               <div class="label">{{ item.label }}</div>
             </div>
@@ -35,7 +49,6 @@
                 <icon-join v-else-if="item.type === 'join'" />
                 <icon-filter v-else-if="item.type === 'filter'" />
                 <icon-data-source v-else-if="item.type === 'data_source'" />
-                <icon-dataset v-else-if="item.type === 'dataset'" />
               </div>
               <div class="label">{{ item.label }}</div>
               <div class="description">{{ item.description }}</div>
@@ -52,24 +65,33 @@ import { Handle, Position } from "@vue-flow/core";
 import { ElIcon, ElPopover } from "element-plus";
 import { CirclePlus } from "@element-plus/icons-vue";
 import { computed, ref } from "vue";
-import IconSql from "@/components/icons/IconSql.vue";
-import IconSelect from "@/components/icons/IconSelect.vue";
-import IconGroupBy from "@/components/icons/IconGroupBy.vue";
-import IconJoin from "@/components/icons/IconJoin.vue";
-import IconFilter from "@/components/icons/IconFilter.vue";
-import IconDataSource from "@/components/icons/IconDataSource.vue";
-import IconDataset from "@/components/icons/IconDataset.vue";
+import IconSql from "@/components/commons/icons/IconSql.vue";
+import IconSelect from "@/components/commons/icons/IconSelect.vue";
+import IconGroupBy from "@/components/commons/icons/IconGroupBy.vue";
+import IconJoin from "@/components/commons/icons/IconJoin.vue";
+import IconFilter from "@/components/commons/icons/IconFilter.vue";
+import IconDataSource from "@/components/commons/icons/IconDataSource.vue";
 
-defineProps<{
+const props = defineProps<{
   type: "target" | "source";
 }>();
 
-defineEmits<{
-  (e: "click:childNode", type: string): void;
+const emits = defineEmits<{
+  (e: "add:parentNode", type: string): void;
+  (e: "add:childNode", type: string): void;
 }>();
 
 const listRef = ref();
 const detailRefs = ref();
+
+const handleClickItem = (itemType: string) => {
+  if (props.type === "source") {
+    emits("add:parentNode", itemType);
+  } else if (props.type === "target") {
+    emits("add:childNode", itemType);
+  }
+  hidePopovers();
+};
 
 const hidePopovers = () => {
   listRef.value?.hide();
@@ -82,12 +104,6 @@ const items = computed(() => [
     onClick: () => {},
     label: "DataSource",
     description: "This is DataSource Detail",
-  },
-  {
-    type: "dataset",
-    onClick: () => {},
-    label: "Dataset",
-    description: "This is Dataset Detail",
   },
   {
     type: "filter",
@@ -123,6 +139,7 @@ const items = computed(() => [
 </script>
 
 <style scoped lang="scss">
+.source.handle,
 .target.handle {
   width: 1rem;
   height: 1rem;
@@ -135,6 +152,10 @@ const items = computed(() => [
     transition-property: all;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
+  }
+
+  .icon {
+    pointer-events: none;
   }
 }
 

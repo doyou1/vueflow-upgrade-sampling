@@ -1,5 +1,9 @@
 <template>
-  <base-node :visible-source-handle="false">
+  <base-node
+    :visible-source-handle="false"
+    @click:node="$emit('click:node')"
+    @add:child-node="$emit('add:childNode', $event)"
+  >
     <template #icon>
       <icon-start />
     </template>
@@ -15,8 +19,7 @@ defineProps<{
 }>();
 
 defineEmits<{
-  // (e: "add:childNode", type: string): void;
+  (e: "click:node"): void;
+  (e: "add:childNode", type: string): void;
 }>();
 </script>
-
-<style scoped lang="scss"></style>
