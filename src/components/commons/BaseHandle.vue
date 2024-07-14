@@ -147,12 +147,6 @@ const items = computed(() => [
   bottom: -0.5rem;
   background-color: white;
 
-  :hover {
-    scale: 1.1;
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
 
   .icon {
     pointer-events: none;

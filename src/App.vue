@@ -7,10 +7,15 @@
           :nodes="nodes"
           :edges="edges"
           v-model:panel-dimensions="panelDimensions"
+          v-model:detail-editor-target-node="detailEditorTargetNode"
           @node-drag-stop="handleNodeDragStop"
           @initialized="onInitialized"
           @add:child-node="onAddChildNode"
           @add:parent-node="onAddParentNode"
+          @add:edge="onAddEdge"
+          @click:node-menu="onClickNodeMenu"
+          @remove:nodes="onRemoveNodes"
+          @remove:edges="onRemoveEdges"
         />
       </el-main>
     </el-container>
@@ -27,11 +32,16 @@ const {
   nodes,
   edges,
   panelDimensions,
+  detailEditorTargetNode,
   isRealInit,
   onInitialized,
   onAddChildNode,
   onAddParentNode,
+  onAddEdge,
+  onClickNodeMenu,
   handleNodeDragStop,
+  onRemoveNodes,
+  onRemoveEdges,
 } = useVueflowController();
 </script>
 

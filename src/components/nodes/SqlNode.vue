@@ -3,6 +3,7 @@
     @click:node="$emit('click:node')"
     @add:parent-node="$emit('add:parentNode', $event)"
     @add:child-node="$emit('add:childNode', $event)"
+    @click:node-menu="$emit('click:nodeMenu', $event)"
   >
     <template #icon>
       <icon-sql />
@@ -22,5 +23,6 @@ defineEmits<{
   (e: "click:node"): void;
   (e: "add:parentNode", type: string): void;
   (e: "add:childNode", type: string): void;
+  (e: "click:nodeMenu", menuType: string): void;
 }>();
 </script>

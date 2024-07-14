@@ -1,4 +1,4 @@
-import { Node as NodeOriginal, Edge as EdgeOriginal, useVueFlow } from "@vue-flow/core"
+import { Node as NodeOriginal, Edge as EdgeOriginal } from "@vue-flow/core"
 import { ComputedRef, ref, computed } from "vue";
 import { useId } from "@/composables/use-id";
 import invariant from "tiny-invariant";
@@ -188,7 +188,8 @@ const getInitNodes = async (panelDimensions: Dimensions): Promise<Array<Node>> =
             },
             position: { x: Math.floor(panelDimensions.width / 2 - SIZE.WIDTH / 2), y: 100 },
             childNodes: [],
-            parentNodes: [], deletable: false,
+            parentNodes: [],
+            deletable: false,
             width: SIZE.WIDTH,
             height: SIZE.HEIGHT,
         },
@@ -294,7 +295,7 @@ const getNewNode = (newNodeId: string, type: string, position: XYPosition, child
 
 export const useVueflowController = () => {
 
-    const original = useVueFlow();
+    // const original = useVueFlow();
     const { generate } = useId();
 
     const nodes = ref<Array<Node>>([]);
@@ -304,6 +305,11 @@ export const useVueflowController = () => {
         width: 0,
         height: 0,
     });
+
+    const detailEditorTargetNode = ref<Node | undefined>(undefined);
+    const clearDetailEditorTargetNode = () => {
+        detailEditorTargetNode.value = undefined;
+    }
 
     const isRealInit = ref<boolean>(false);
     const onInitialized = async () => {
@@ -316,6 +322,17 @@ export const useVueflowController = () => {
             node: nodes.value.find((v) => v.id === nodeId),
             index: nodes.value.findIndex((v) => v.id === nodeId),
         }
+    };
+
+    const findEdge = (edgeId: string) => {
+        return {
+            edge: edges.value.find((v) => v.id === edgeId),
+            index: edges.value.findIndex((v) => v.id === edgeId),
+        }
+    };
+
+    const findEdgesByNodeId = (nodeId: string) => {
+        return edges.value.filter((v) => v.source === nodeId || v.target === nodeId);
     };
 
     /** update position value */
@@ -332,7 +349,6 @@ export const useVueflowController = () => {
             case "data_source":
             case "sql":
             case "select": {
-
                 const { node: parent } = findNode(parentNodeId);
                 invariant(parent !== undefined);
 
@@ -340,7 +356,6 @@ export const useVueflowController = () => {
                     x: parent.position.x + (parent.childNodes.length * (SIZE.WIDTH + SIZE.X_GAP)),
                     y: parent.position.y + SIZE.HEIGHT + SIZE.Y_GAP
                 };
-
                 const newNode = getNewNode(generate(), type, position, [], [parentNodeId]);
                 invariant(newNode !== undefined);
                 /** add new node */
@@ -350,12 +365,13 @@ export const useVueflowController = () => {
                 /** add new Edge new node to parent */
                 edges.value.push({
                     id: generate(),
-                    source: newNode.id,
-                    target: parentNodeId,
+                    source: newNode.id, // child
+                    target: parentNodeId,   // parent
                 });
                 break;
             }
         }
+        clearDetailEditorTargetNode();
     }
 
     const onAddParentNode = (type: string, childNodeId: string) => {
@@ -367,15 +383,12 @@ export const useVueflowController = () => {
             case "data_source":
             case "sql":
             case "select": {
-
                 const { node: child } = findNode(childNodeId);
                 invariant(child !== undefined);
-
                 const position = {
                     x: child.position.x + (child.parentNodes.length * (SIZE.WIDTH + SIZE.X_GAP)),
                     y: child.position.y - SIZE.HEIGHT - SIZE.Y_GAP
                 };
-
                 const newNode = getNewNode(generate(), type, position, [childNodeId], []);
                 invariant(newNode !== undefined);
                 /** add new node */
@@ -391,80 +404,93 @@ export const useVueflowController = () => {
                 break;
             }
         }
-    }
-
-    const onUpdateNode = (nodeId: string, nodeUpdate: (node: Node) => Node) => {
-        const { node, index } = findNode(nodeId);
-        invariant((node && index !== -1));
-        nodes.value[index] = nodeUpdate(node);
+        clearDetailEditorTargetNode();
     }
 
     const onAddEdge = (value: Connection) => {
-        const { generate } = useId();
         edges.value.push({
             id: generate(),
             source: value.source,
             target: value.target,
         });
+        clearDetailEditorTargetNode();
     }
     const onRemoveNodes = (removeNodeIds: Array<string>) => {
-        nodes.value = nodes.value.filter((node) => !removeNodeIds.includes(node.id));
+        /** remove related edge */
+        const removeEdgeIds = removeNodeIds.map((nodeId) => findEdgesByNodeId(nodeId)).map((edges) => edges.map((edge) => edge.id).flat()).flat();
+        edges.value = JSON.parse(JSON.stringify(edges.value.filter((edge) => !removeEdgeIds.includes(edge.id))));
+
+        /** remove node */
+        nodes.value = JSON.parse(JSON.stringify(nodes.value.filter((node) => !removeNodeIds.includes(node.id))));
+
+        /** remove parent, child relation */
+        nodes.value.forEach((node) => {
+            onUpdateNode(node.id, (node) => (
+                {
+                    ...node,
+                    childNodes: node.childNodes.filter((childNodeId) => !removeNodeIds.includes(childNodeId)),
+                    parentNodes: node.parentNodes.filter((parentNodeId) => !removeNodeIds.includes(parentNodeId))
+                }));
+        });
+        clearDetailEditorTargetNode();
     }
 
+    /** edge.source: child */
+    /** edge.target: parent */
     const onRemoveEdges = (removeEdgeIds: Array<string>) => {
+        const sourceTargetList = removeEdgeIds.map((edgeId) => findEdge(edgeId));
+        /** remove edge */
         edges.value = edges.value.filter((edge) => !removeEdgeIds.includes(edge.id));
+        /** remove parent, child relation */
+        sourceTargetList.forEach(({ edge }) => {
+            invariant(edge);
+
+            /** update child node's parentNodes */
+            onUpdateNode(edge.source, (node) => (
+                {
+                    ...node,
+                    parentNodes: node.parentNodes.filter((parentNodeId) => edge.target !== parentNodeId),
+                }));
+            /** update parent node's childNodes */
+            onUpdateNode(edge.target, (node) => (
+                {
+                    ...node,
+                    childNodes: node.childNodes.filter((childNodeId) => edge.source !== childNodeId),
+                }));
+        });
+        clearDetailEditorTargetNode();
     }
 
-    const onClickMenu = (menu: MenuType, nodeId: string) => {
-        switch (menu) {
-            case "detail": {
-                openDetailEditor(nodeId);
-                break;
-            }
+    const onClickNodeMenu = (nodeId: string, menuType: string) => {
+        switch (menuType) {
             case "delete": {
                 onRemoveNodes([nodeId]);
-                break;
             }
         }
     }
 
-    const targetNode = ref<Node | undefined>(undefined);
-
-    const openDetailEditor = (nodeId: string) => {
-        const { node } = findNode(nodeId);
-        if (node) {
-            targetNode.value = node;
-        }
+    const onUpdateNode = (nodeId: string, nodeUpdate: (node: Node) => Node) => {
+        const { node, index } = findNode(nodeId);
+        invariant((node && index !== -1));
+        nodes.value[index] = JSON.parse(JSON.stringify(nodeUpdate(node)));
     }
 
-    const closeDetailEditor = () => {
-        targetNode.value = undefined;
-    }
 
-    const saveNode = (newNode: Node) => {
-        invariant(targetNode.value && targetNode.value.id === newNode.id && targetNode.value.type === newNode.type);
-        const { index } = findNode(newNode.id);
-        invariant(index !== -1);
-        nodes.value[index] = newNode;
-        original.updateNode(newNode.id, { data: { ...newNode.data } });
-    }
 
     return {
         panelDimensions,
+        detailEditorTargetNode,
         nodes,
         edges,
         handleNodeDragStop,
         onInitialized,
         onAddChildNode,
         onAddParentNode,
+        onClickNodeMenu,
         onUpdateNode,
         onAddEdge,
         onRemoveNodes,
         onRemoveEdges,
-        onClickMenu,
-        targetNode,
-        closeDetailEditor,
-        saveNode,
         isRealInit,
     };
 

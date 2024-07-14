@@ -6,6 +6,7 @@
     @node-drag-stop="
       $emit('nodeDragStop', $event.node.id, $event.node.position)
     "
+    @connect="$emit('add:edge', $event)"
     @nodes-change="onNodesChange"
     @edges-change="onEdgesChange"
   >
@@ -14,15 +15,17 @@
       <start-node
         :name="data.formData.name"
         @click:node="handleClickNode(id)"
-        @add:child-node="$emit('add:childNode',$event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
       />
     </template>
     <template #node-sql="{ id, data }">
       <sql-node
         :name="data.formData.name"
         @click:node="handleClickNode(id)"
-        @add:parent-node="$emit('add:parentNode',$event, id)"
-        @add:child-node="$emit('add:childNode',$event, id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
       />
     </template>
     <template #node-select="{ type }">
@@ -43,8 +46,7 @@
     <template #node-dataset="{ type }">
       {{ type }}
     </template>
-
-    <detail-editor-panel v-if="targetNode" :target-node="targetNode" @close="targetNode = undefined;"/>
+    <detail-editor-panel v-if="detailEditorTargetNode" :target-node="detailEditorTargetNode" @close="$emit('update:detailEditorTargetNode', undefined)"/>
   </vue-flow>
 </template>
 
@@ -57,6 +59,7 @@ import {
   NodeChange,
   EdgeChange,
   XYPosition,
+  Connection,
 } from "@/composables/use-vueflow-controller";
 import StartNode from "@/components/nodes/StartNode.vue";
 import SqlNode from "@/components/nodes/SqlNode.vue";
@@ -67,6 +70,7 @@ const props = defineProps<{
   nodes: Array<Node>;
   edges: Array<Edge>;
   panelDimensions: Dimensions;
+  detailEditorTargetNode: Node | undefined;
 }>();
 
 const emits = defineEmits<{
@@ -74,9 +78,12 @@ const emits = defineEmits<{
   (e: "initialized"): void;
   (e: "nodeDragStop", nodeId: string, newPosition: XYPosition): void;
   (e: "remove:nodes", removeNodeIds: Array<string>): void;
+  (e: "add:edge", value: Connection): void;
   (e: "remove:edges", removeEdgeIds: Array<string>): void;
   (e: "add:parentNode", type: string, childNodeId: string): void;
   (e: "add:childNode", type: string, parentNodeId: string): void;
+  (e: "click:nodeMenu", nodeId: string, menuType: string): void;
+  (e: "update:detailEditorTargetNode", value: Node | undefined): void;
 }>();
 
 const vueFlowRef = ref<InstanceType<typeof VueFlow>>();
@@ -84,7 +91,7 @@ const vueFlowRef = ref<InstanceType<typeof VueFlow>>();
 watch(vueFlowRef, () => {
   if (vueFlowRef.value) {
     emits("update:panelDimensions", vueFlowRef.value.dimensions);
-    if (vueFlowRef.value.dimensions.height > 500) emits("initialized");
+    emits("initialized");
   }
 });
 
@@ -117,13 +124,24 @@ const onZoomOut = () => {
   }
 };
 
-const targetNode = ref<Node | undefined>(undefined);
 const handleClickNode = (nodeId: string) => {
   const node = props.nodes.find((v) => v.id === nodeId);
   if (node) {
-    targetNode.value = node;
+    emits("update:detailEditorTargetNode", node);
   }
-}
+};
+
+const handleAddParentNode = (type: string, childNodeId: string) => {
+  emits("add:parentNode", type, childNodeId);
+};
+
+const handleAddChildNode = (type: string, parentNodeId: string) => {
+  emits("add:childNode", type, parentNodeId);
+};
+
+const handleClickNodeMenu = (nodeId: string, menuType: string) => {
+  emits("click:nodeMenu", nodeId, menuType);
+};
 </script>
 
 <style scoped lang="scss"></style>

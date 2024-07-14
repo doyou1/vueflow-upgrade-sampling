@@ -3,6 +3,8 @@
     :visible-source-handle="false"
     @click:node="$emit('click:node')"
     @add:child-node="$emit('add:childNode', $event)"
+    @click:node-menu="$emit('click:nodeMenu', $event)"
+    :visible-menu="false"
   >
     <template #icon>
       <icon-start />
@@ -21,5 +23,6 @@ defineProps<{
 defineEmits<{
   (e: "click:node"): void;
   (e: "add:childNode", type: string): void;
+  (e: "click:nodeMenu", menuType: string): void;
 }>();
 </script>

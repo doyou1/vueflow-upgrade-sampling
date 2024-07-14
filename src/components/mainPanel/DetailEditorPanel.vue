@@ -1,12 +1,10 @@
 <template>
-  <panel class="detail-editor-panel" ref="panelRef">
+  <panel class="detail-editor-panel" ref="panelRef" position="top-right">
     {{ targetNode }}
   </panel>
 </template>
 
 <script setup lang="ts">
-import { ElButton } from "element-plus";
-import { ZoomOut, ZoomIn } from "@element-plus/icons-vue";
 import { Panel } from "@vue-flow/core";
 import { ref } from "vue";
 import { onClickOutside } from '@vueuse/core'
