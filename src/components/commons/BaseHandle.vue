@@ -5,6 +5,7 @@
     :placement="type === 'target' ? 'bottom' : 'top'"
     :show-after="100"
     :hide-after="100"
+    :disabled="disabled"
   >
     <template #reference>
       <Handle
@@ -74,6 +75,7 @@ import IconDataSource from "@/components/commons/icons/IconDataSource.vue";
 
 const props = defineProps<{
   type: "target" | "source";
+  disabled: boolean;
 }>();
 
 const emits = defineEmits<{

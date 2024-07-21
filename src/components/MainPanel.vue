@@ -15,6 +15,7 @@
     <template #node-start="{ id, data }">
       <start-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
         @add:child-node="handleAddChildNode($event, id)"
         @click:node-menu="handleClickNodeMenu(id, $event)"
       />
@@ -22,6 +23,8 @@
     <template #node-sql="{ id, data }">
       <sql-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
         @add:child-node="handleAddChildNode($event, id)"
@@ -31,6 +34,8 @@
     <template #node-select="{ id, data }">
       <select-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
         @add:child-node="handleAddChildNode($event, id)"
@@ -40,6 +45,8 @@
     <template #node-group_by="{ id, data }">
       <group-by-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
         @add:child-node="handleAddChildNode($event, id)"
@@ -49,6 +56,8 @@
     <template #node-join="{ id, data }">
       <join-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
         @add:child-node="handleAddChildNode($event, id)"
@@ -58,6 +67,8 @@
     <template #node-filter="{ id, data }">
       <filter-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
         @add:child-node="handleAddChildNode($event, id)"
@@ -67,6 +78,8 @@
     <template #node-data_source="{ id, data }">
       <data-source-node
         :name="data.formData.name"
+        :has-child-nodes="hasChildNodes(id)"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
         @add:child-node="handleAddChildNode($event, id)"
@@ -76,9 +89,9 @@
     <template #node-dataset="{ id, data }">
       <dataset-node
         :name="data.formData.name"
+        :has-parent-nodes="hasParentNodes(id)"
         @click:node="handleClickNode(id)"
         @add:parent-node="handleAddParentNode($event, id)"
-        @add:child-node="handleAddChildNode($event, id)"
         @click:node-menu="handleClickNodeMenu(id, $event)"
       />
     </template>
@@ -101,6 +114,7 @@ import {
   EdgeChange,
   XYPosition,
   Connection,
+  findNodeByNodes,
 } from "@/composables/use-vueflow-controller";
 import StartNode from "@/components/nodes/StartNode.vue";
 import SqlNode from "@/components/nodes/SqlNode.vue";
@@ -171,8 +185,10 @@ const onZoomOut = () => {
   }
 };
 
+const hasChildNodes = (nodeId: string) => (findNodeByNodes(nodeId, props.nodes).node?.childNodes ?? []).length > 0;
+const hasParentNodes = (nodeId: string) => (findNodeByNodes(nodeId, props.nodes).node?.parentNodes ?? []).length > 0;
 const handleClickNode = (nodeId: string) => {
-  const node = props.nodes.find((v) => v.id === nodeId);
+  const node = findNodeByNodes(nodeId, props.nodes).node;
   if (node) {
     emits("update:detailEditorTargetNode", node);
   }

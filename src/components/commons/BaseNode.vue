@@ -3,6 +3,7 @@
     <base-handle
       v-if="visibleSourceHandle"
       type="source"
+      :disabled="hasParentNodes"
       @add:parent-node="$emit('add:parentNode', $event)"
     />
     <el-popover
@@ -33,6 +34,7 @@
     <base-handle
       v-if="visibleTargetHandle"
       type="target"
+      :disabled="hasChildNodes"
       @add:child-node="$emit('add:childNode', $event)"
     />
   </div>
@@ -49,12 +51,16 @@ withDefaults(
     visibleSourceHandle?: boolean;
     visibleTargetHandle?: boolean;
     visibleMenu?: boolean;
+    hasChildNodes?: boolean;
+    hasParentNodes?: boolean;
     menus?: Array<string>;
   }>(),
   {
     visibleSourceHandle: true,
     visibleTargetHandle: true,
     visibleMenu: true,
+    hasChildNodes: false,
+    hasParentNodes: false,
     menus: () => ["edit", "delete"],
   }
 );

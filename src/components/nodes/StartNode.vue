@@ -1,10 +1,11 @@
 <template>
   <base-node
     :visible-source-handle="false"
+    :visible-menu="false"
+    :has-child-nodes="hasChildNodes"
     @click:node="$emit('click:node')"
     @add:child-node="$emit('add:childNode', $event)"
     @click:node-menu="$emit('click:nodeMenu', $event)"
-    :visible-menu="false"
   >
     <template #icon>
       <icon-start />
@@ -18,6 +19,7 @@ import BaseNode from "@/components/commons/BaseNode.vue";
 import IconStart from "@/components/commons/icons/IconStart.vue";
 defineProps<{
   name: string;
+  hasChildNodes: boolean;
 }>();
 
 defineEmits<{

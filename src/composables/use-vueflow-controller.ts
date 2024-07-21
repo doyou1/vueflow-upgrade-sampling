@@ -532,3 +532,10 @@ export const useVueflowHistoryController = (target: ComputedRef<HistoryTarget>, 
         canRedo: original.canRedo,
     }
 }
+
+export const findNodeByNodes = (nodeId: string, nodes: Array<Node>) => {
+    return {
+        node: nodes.find((v) => v.id === nodeId),
+        index: nodes.findIndex((v) => v.id === nodeId),
+    }
+};
