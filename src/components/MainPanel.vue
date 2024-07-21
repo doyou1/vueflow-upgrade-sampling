@@ -10,6 +10,7 @@
     @nodes-change="onNodesChange"
     @edges-change="onEdgesChange"
   >
+    <mini-map />
     <controller-panel @zoom-in="onZoomIn" @zoom-out="onZoomOut" />
     <template #node-start="{ id, data }">
       <start-node
@@ -82,12 +83,17 @@
         @click:node-menu="handleClickNodeMenu(id, $event)"
       />
     </template>
-    <detail-editor-panel v-if="detailEditorTargetNode" :target-node="detailEditorTargetNode" @close="$emit('update:detailEditorTargetNode', undefined)"/>
+    <detail-editor-panel
+      v-if="detailEditorTargetNode"
+      :target-node="detailEditorTargetNode"
+      @close="$emit('update:detailEditorTargetNode', undefined)"
+    />
   </vue-flow>
 </template>
 
 <script setup lang="ts">
 import { VueFlow } from "@vue-flow/core";
+import { MiniMap } from "@vue-flow/minimap";
 import {
   Node,
   Edge,
