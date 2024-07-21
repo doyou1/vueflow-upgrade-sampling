@@ -23,11 +23,11 @@
         </div>
       </template>
       <template #default>
-        <el-button
-          v-for="menu in menus"
-          @click="$emit('click:nodeMenu', menu)"
-          >{{ menu.toUpperCase() }}</el-button
-        >
+        <div v-for="menu in menus">
+          <el-button @click="$emit('click:nodeMenu', menu)">{{
+            menu.toUpperCase()
+          }}</el-button>
+        </div>
       </template>
     </el-popover>
     <base-handle
@@ -55,7 +55,7 @@ withDefaults(
     visibleSourceHandle: true,
     visibleTargetHandle: true,
     visibleMenu: true,
-    menus: () => ["delete"],
+    menus: () => ["edit", "delete"],
   }
 );
 

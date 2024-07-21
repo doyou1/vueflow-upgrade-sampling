@@ -463,8 +463,13 @@ export const useVueflowController = () => {
 
     const onClickNodeMenu = (nodeId: string, menuType: string) => {
         switch (menuType) {
+            case "edit": {
+                detailEditorTargetNode.value = findNode(nodeId)?.node;
+                break;
+            }
             case "delete": {
                 onRemoveNodes([nodeId]);
+                break;
             }
         }
     }

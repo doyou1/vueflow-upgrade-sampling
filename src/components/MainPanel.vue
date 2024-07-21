@@ -10,12 +10,11 @@
     @nodes-change="onNodesChange"
     @edges-change="onEdgesChange"
   >
-    <mini-map />
+    <mini-map v-show="detailEditorTargetNode === undefined"/>
     <controller-panel @zoom-in="onZoomIn" @zoom-out="onZoomOut" />
     <template #node-start="{ id, data }">
       <start-node
         :name="data.formData.name"
-        @click:node="handleClickNode(id)"
         @add:child-node="handleAddChildNode($event, id)"
         @click:node-menu="handleClickNodeMenu(id, $event)"
       />
@@ -83,7 +82,7 @@
         @click:node-menu="handleClickNodeMenu(id, $event)"
       />
     </template>
-    <detail-editor-panel
+    <base-detail-editor-panel
       v-if="detailEditorTargetNode"
       :target-node="detailEditorTargetNode"
       @close="$emit('update:detailEditorTargetNode', undefined)"
@@ -112,7 +111,7 @@ import FilterNode from "@/components/nodes/FilterNode.vue";
 import DataSourceNode from "@/components/nodes/DataSourceNode.vue";
 import DatasetNode from "@/components/nodes/DatasetNode.vue";
 import ControllerPanel from "@/components/mainPanel/ControllerPanel.vue";
-import DetailEditorPanel from "@/components/mainPanel/DetailEditorPanel.vue";
+import BaseDetailEditorPanel from "@/components/commons/BaseDetailEditorPanel.vue";
 import { ref, watch } from "vue";
 const props = defineProps<{
   nodes: Array<Node>;
