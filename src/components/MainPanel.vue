@@ -28,23 +28,59 @@
         @click:node-menu="handleClickNodeMenu(id, $event)"
       />
     </template>
-    <template #node-select="{ type }">
-      {{ type }}
+    <template #node-select="{ id, data }">
+      <select-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
+      />
     </template>
-    <template #node-group_by="{ type }">
-      {{ type }}
+    <template #node-group_by="{ id, data }">
+      <group-by-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
+      />
     </template>
-    <template #node-join="{ type }">
-      {{ type }}
+    <template #node-join="{ id, data }">
+      <join-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
+      />
     </template>
-    <template #node-filter="{ type }">
-      {{ type }}
+    <template #node-filter="{ id, data }">
+      <filter-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
+      />
     </template>
-    <template #node-data_source="{ type }">
-      {{ type }}
+    <template #node-data_source="{ id, data }">
+      <data-source-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
+      />
     </template>
-    <template #node-dataset="{ type }">
-      {{ type }}
+    <template #node-dataset="{ id, data }">
+      <dataset-node
+        :name="data.formData.name"
+        @click:node="handleClickNode(id)"
+        @add:parent-node="handleAddParentNode($event, id)"
+        @add:child-node="handleAddChildNode($event, id)"
+        @click:node-menu="handleClickNodeMenu(id, $event)"
+      />
     </template>
     <detail-editor-panel v-if="detailEditorTargetNode" :target-node="detailEditorTargetNode" @close="$emit('update:detailEditorTargetNode', undefined)"/>
   </vue-flow>
@@ -63,6 +99,12 @@ import {
 } from "@/composables/use-vueflow-controller";
 import StartNode from "@/components/nodes/StartNode.vue";
 import SqlNode from "@/components/nodes/SqlNode.vue";
+import SelectNode from "@/components/nodes/SelectNode.vue";
+import GroupByNode from "@/components/nodes/GroupByNode.vue";
+import JoinNode from "@/components/nodes/JoinNode.vue";
+import FilterNode from "@/components/nodes/FilterNode.vue";
+import DataSourceNode from "@/components/nodes/DataSourceNode.vue";
+import DatasetNode from "@/components/nodes/DatasetNode.vue";
 import ControllerPanel from "@/components/mainPanel/ControllerPanel.vue";
 import DetailEditorPanel from "@/components/mainPanel/DetailEditorPanel.vue";
 import { ref, watch } from "vue";

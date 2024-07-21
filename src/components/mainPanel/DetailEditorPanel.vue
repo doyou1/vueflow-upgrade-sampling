@@ -7,7 +7,8 @@
 <script setup lang="ts">
 import { Panel } from "@vue-flow/core";
 import { ref } from "vue";
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside } from "@vueuse/core";
+import { Node } from "@/composables/use-vueflow-controller";
 defineProps<{
   targetNode: Node;
 }>();
@@ -17,7 +18,7 @@ const emits = defineEmits<{
 }>();
 const panelRef = ref();
 onClickOutside(panelRef, () => {
-  emits("close")
+  emits("close");
 });
 </script>
 
